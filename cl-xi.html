@@ -452,7 +452,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var
       <div class="sbar-phase" id="sbar-phase">Group Stage</div>
     </div>
     <div class="sbar-right">
-      <div class="speed-wrap">SPEED<select id="speed-sel"><option value="420">Normal</option><option value="120">Fast</option><option value="16">Ludicrous</option></select></div>
+      <div class="speed-wrap">SPEED<select id="speed-sel"><option value="900">Normal</option><option value="400">Fast</option><option value="80">Ludicrous</option></select></div>
       <button class="skip-btn" id="btn-skip">SKIP TO END</button>
     </div>
   </div>
@@ -1392,74 +1392,186 @@ function startTournament(){
   show('s-season');
   runNextSimStep();
 }
+
+function getSpeed(){return parseInt($('speed-sel').value)||700;}
+
 function buildSimQueue(){
   if(G.tournFmt==='classic'){
     buildGroups();
+    // Find user's group
+    const usGrp=G.groups.find(g=>g.teams.some(t=>t.isUs));
+    // Queue: header, then each of 6 matches in user's group one by one, sidebar after each
     simQueue.push({type:'header',label:'GROUP STAGE'});
-    simQueue.push({type:'simGroups'});
-    simQueue.push({type:'renderGroups'});
+    simQueue.push({type:'simAllOtherGroups'}); // sim other groups instantly (no render)
+    if(usGrp){
+      simQueue.push({type:'groupHeader',grp:usGrp});
+      // Build the 6 match pairs
+      const T=usGrp.teams;
+      const pairs=[];
+      for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++)pairs.push([i,j]);
+      pairs.forEach(([i,j])=>simQueue.push({type:'groupMatch',grp:usGrp,i,j}));
+    }
+    simQueue.push({type:'renderFinalGroupTable'});
     simQueue.push({type:'header',label:'ROUND OF 16'});
-    simQueue.push({type:'ko',round:'R16',getTeams:getGroupQualifiers});
+    // R16: one match at a time with delay
+    simQueue.push({type:'koRound',round:'R16',label:'ROUND OF 16',getTeams:getGroupQualifiers});
     simQueue.push({type:'header',label:'QUARTER-FINALS'});
-    simQueue.push({type:'ko',round:'QF',getTeams:()=>getKOWinners('R16')});
+    simQueue.push({type:'koRound',round:'QF',label:'QUARTER-FINALS',getTeams:()=>getKOWinners('R16')});
     simQueue.push({type:'header',label:'SEMI-FINALS'});
-    simQueue.push({type:'ko',round:'SF',getTeams:()=>getKOWinners('QF')});
+    simQueue.push({type:'koRound',round:'SF',label:'SEMI-FINALS',getTeams:()=>getKOWinners('QF')});
     simQueue.push({type:'header',label:'FINAL'});
-    simQueue.push({type:'ko',round:'Final',getTeams:()=>getKOWinners('SF'),final:true});
+    simQueue.push({type:'koRound',round:'Final',label:'FINAL',getTeams:()=>getKOWinners('SF'),final:true});
   } else {
     buildLeaguePhase();
     simQueue.push({type:'header',label:'LEAGUE PHASE'});
-    simQueue.push({type:'simLeague'});
-    simQueue.push({type:'renderLeague'});
+    simQueue.push({type:'leagueHeader'});
+    // Each of the 8 user matches one by one
+    (G.leagueMatches||[]).forEach((m,idx)=>simQueue.push({type:'leagueMatch',idx}));
+    simQueue.push({type:'renderFinalLeagueTable'});
     simQueue.push({type:'header',label:'PLAYOFF ROUND'});
-    simQueue.push({type:'playoff'});
+    simQueue.push({type:'koRound',round:'Playoff',label:'PLAYOFF ROUND',getTeams:()=>getLeaguePlayoffTeams()});
     simQueue.push({type:'header',label:'ROUND OF 16'});
-    simQueue.push({type:'ko',round:'R16',getTeams:()=>getKOWinners('Playoff',true)});
+    simQueue.push({type:'koRound',round:'R16',label:'ROUND OF 16',getTeams:()=>getKOWinners('Playoff',true)});
     simQueue.push({type:'header',label:'QUARTER-FINALS'});
-    simQueue.push({type:'ko',round:'QF',getTeams:()=>getKOWinners('R16')});
+    simQueue.push({type:'koRound',round:'QF',label:'QUARTER-FINALS',getTeams:()=>getKOWinners('R16')});
     simQueue.push({type:'header',label:'SEMI-FINALS'});
-    simQueue.push({type:'ko',round:'SF',getTeams:()=>getKOWinners('QF')});
+    simQueue.push({type:'koRound',round:'SF',label:'SEMI-FINALS',getTeams:()=>getKOWinners('QF')});
     simQueue.push({type:'header',label:'FINAL'});
-    simQueue.push({type:'ko',round:'Final',getTeams:()=>getKOWinners('SF'),final:true});
+    simQueue.push({type:'koRound',round:'Final',label:'FINAL',getTeams:()=>getKOWinners('SF'),final:true});
   }
   simQueue.push({type:'done'});
 }
+
+function getLeaguePlayoffTeams(){
+  return G.leagueRows.slice(8,24).map(r=>r.name);
+}
+
 function getKOWinners(round,includeDirect){
   const winners=G.koRounds.filter(r=>r.round===round).map(r=>r.winner);
   if(includeDirect&&G.leagueRows.length){
-    const direct=G.leagueRows.slice(0,8).map(r=>r.name);
-    return[...direct,...winners];
+    return[...G.leagueRows.slice(0,8).map(r=>r.name),...winners];
   }
   return winners;
 }
+
 function runNextSimStep(){
-  if(!G.simRunning||simQIdx>=simQueue.length){setTimeout(showResult,400);return;}
+  if(!G.simRunning||simQIdx>=simQueue.length){setTimeout(showResult,600);return;}
   const step=simQueue[simQIdx++];
   const pct=Math.round(simQIdx/simQueue.length*100);
   const fill=$('mob-sim-fill');if(fill)fill.style.width=pct+'%';
-  const lbl=$('mob-sim-label');if(lbl)lbl.textContent=`Step ${simQIdx} of ${simQueue.length}`;
-  const speed=parseInt($('speed-sel').value)||420;
-  G.simTimer=setTimeout(()=>execSimStep(step),speed);
+  const lbl=$('mob-sim-label');if(lbl)lbl.textContent=step.label||'Simulating...';
+  G.simTimer=setTimeout(()=>execSimStep(step),step.delay||0);
 }
+
 function execSimStep(step){
   if(!G.simRunning)return;
-  if(step.type==='header'){addPhaseHeader(step.label);renderSidebar();runNextSimStep();}
-  else if(step.type==='simGroups'){simGroups();runNextSimStep();}
-  else if(step.type==='renderGroups'){renderGroupsUI();renderSidebar();runNextSimStep();}
-  else if(step.type==='simLeague'){/* already done in buildLeaguePhase */runNextSimStep();}
-  else if(step.type==='renderLeague'){renderLeagueUI();renderSidebar();runNextSimStep();}
-  else if(step.type==='playoff'){renderPlayoffUI();renderSidebar();runNextSimStep();}
-  else if(step.type==='ko'){
+  const spd=getSpeed();
+
+  if(step.type==='header'){
+    addPhaseHeader(step.label);
+    $('sbar-phase').textContent=step.label;
+    runNextSimStep();
+  }
+  else if(step.type==='simAllOtherGroups'){
+    // Simulate all groups except user's group fully (no render)
+    const usGrpName=G.groups.find(g=>g.teams.some(t=>t.isUs))?.name;
+    G.groups.forEach(grp=>{
+      if(grp.name===usGrpName)return;
+      const T=grp.teams;
+      for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++){
+        const t1=T[i],t2=T[j];
+        const s1=clStr(t1.name),s2=clStr(t2.name);
+        const[g1,g2]=simMatch(s1,s2);const[g3,g4]=simMatch(s2,s1);
+        const a1=g1+g4,a2=g2+g3;
+        if(a1>a2){t1.w++;t1.pts+=3;t2.l++;}else if(a1===a2){t1.d++;t1.pts++;t2.d++;t2.pts++;}else{t2.w++;t2.pts+=3;t1.l++;}
+        t1.gf+=a1;t1.ga+=a2;t2.gf+=a2;t2.ga+=a1;
+      }
+      grp.teams.sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+    });
+    runNextSimStep();
+  }
+  else if(step.type==='groupHeader'){
+    const grp=step.grp;
+    const mc=$('matches-col');
+    const hdr=document.createElement('div');
+    hdr.innerHTML=`<div class="group-label">GROUP ${grp.name} — YOUR GROUP</div>`;
+    hdr.id='grp-block-'+grp.name;
+    mc.appendChild(hdr);
+    // Render initial empty standings
+    renderGroupTable(grp);
+    runNextSimStep();
+  }
+  else if(step.type==='groupMatch'){
+    // Simulate one match in the group and render it
+    const grp=step.grp;
+    const T=grp.teams;
+    const t1=T[step.i],t2=T[step.j];
+    const s1=t1.isUs?myStr():clStr(t1.name);
+    const s2=t2.isUs?myStr():clStr(t2.name);
+    const[g1,g2]=simMatch(s1,s2);const[g3,g4]=simMatch(s2,s1);
+    const a1=g1+g4,a2=g2+g3;
+    if(a1>a2){t1.w++;t1.pts+=3;t2.l++;}else if(a1===a2){t1.d++;t1.pts++;t2.d++;t2.pts++;}else{t2.w++;t2.pts+=3;t1.l++;}
+    t1.gf+=a1;t1.ga+=a2;t2.gf+=a2;t2.ga+=a1;
+    if(t1.isUs){for(let k=0;k<a1;k++){const s=pickScorer();G.goalscorers[s]=(G.goalscorers[s]||0)+1;}}
+    if(t2.isUs){for(let k=0;k<a2;k++){const s=pickScorer();G.goalscorers[s]=(G.goalscorers[s]||0)+1;}}
+    grp.played.push({t1:t1.name,t2:t2.name,s1:a1,s2:a2,usIn:t1.isUs||t2.isUs});
+    grp.teams.sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+    // Render match row
+    renderGroupMatchRow(grp,t1.name,t2.name,a1,a2,t1.isUs||t2.isUs);
+    // Update live group table
+    renderGroupTable(grp);
+    // Update sidebar
+    renderSidebar();
+    G.simTimer=setTimeout(()=>{if(G.simRunning)runNextSimStep();},spd);
+  }
+  else if(step.type==='renderFinalGroupTable'){
+    renderSidebar();runNextSimStep();
+  }
+  else if(step.type==='leagueHeader'){
+    const mc=$('matches-col');
+    const hdr=document.createElement('div');
+    hdr.innerHTML='<div class="group-label">YOUR 8 LEAGUE PHASE MATCHES</div>';
+    hdr.id='league-matches-block';
+    mc.appendChild(hdr);
+    renderSidebar();
+    runNextSimStep();
+  }
+  else if(step.type==='leagueMatch'){
+    // Render one pre-simulated league match with a delay
+    const m=G.leagueMatches[step.idx];
+    if(!m){runNextSimStep();return;}
+    // Update the live table progressively
+    const mc=$('matches-col');
+    const block=document.getElementById('league-matches-block')||mc.lastElementChild;
+    const row=document.createElement('div');row.className='match-row';
+    const usH=m.t1===MY_TEAM,usA=m.t2===MY_TEAM;
+    const win=(usH&&m.s1>m.s2)||(usA&&m.s2>m.s1),loss=(usH&&m.s1<m.s2)||(usA&&m.s2<m.s1);
+    row.innerHTML=`<div class="match-home${usH?' us':''}">${m.t1}</div>
+      <div class="match-score ${win?'win':loss?'loss':'draw'}">${m.s1}–${m.s2}</div>
+      <div class="match-away${usA?' us':''}">${m.t2}</div>`;
+    block.appendChild(row);
+    requestAnimationFrame(()=>requestAnimationFrame(()=>row.classList.add('shown')));
+    row.scrollIntoView({behavior:'smooth',block:'nearest'});
+    renderSidebar();
+    G.simTimer=setTimeout(()=>{if(G.simRunning)runNextSimStep();},spd);
+  }
+  else if(step.type==='renderFinalLeagueTable'){
+    renderSidebar();runNextSimStep();
+  }
+  else if(step.type==='koRound'){
+    // Simulate the whole round then render each match one by one with delays
     const teams=step.getTeams();
     const results=[];
     const shuffled=[...teams].sort(()=>Math.random()-.5);
     for(let i=0;i<shuffled.length;i+=2){
       const t1=shuffled[i],t2=shuffled[i+1];
-      if(!t2){G.koRounds.push({round:step.round,t1,t2:t1,winner:t1,loser:'',score:'bye',pens:false,usIn:t1===MY_TEAM});results.push({t1,t2:t1,winner:t1,score:'bye',usIn:t1===MY_TEAM});continue;}
+      if(!t2){
+        G.koRounds.push({round:step.round,t1,t2:t1,winner:t1,loser:'',score:'bye',pens:false,usIn:t1===MY_TEAM});
+        continue;
+      }
       const s1=t1===MY_TEAM?myStr():clStr(t1);const s2=t2===MY_TEAM?myStr():clStr(t2);
-      const isF=step.final;
       let res;
-      if(isF){const[g1,g2]=simMatchNeutral(s1,s2);const w1=g1>g2||(g1===g2&&Math.random()>.5);res={win1:w1,score:`${g1}–${g2}`,pens:g1===g2};}
+      if(step.final){const[g1,g2]=simMatchNeutral(s1,s2);const w1=g1>g2||(g1===g2&&Math.random()>.5);res={win1:w1,score:`${g1}–${g2}`,pens:g1===g2};}
       else res=simKOTwoLegs(s1,s2);
       const winner=res.win1?t1:t2;const loser=res.win1?t2:t1;
       const usIn=t1===MY_TEAM||t2===MY_TEAM;
@@ -1467,10 +1579,40 @@ function execSimStep(step){
       results.push({t1,t2,winner,score:res.score,pens:res.pens,usIn});
       if(usIn){const goals=parseInt(res.score.split('–')[0])||0;for(let k=0;k<goals;k++){const s=pickScorer();G.goalscorers[s]=(G.goalscorers[s]||0)+1;}}
     }
-    renderKORound(step.round,step.label||step.round,results,step.final);
-    renderSidebar();
-    if(step.final){G.simRunning=false;setTimeout(showResult,600);}
-    else runNextSimStep();
+    // Now reveal each match result one by one
+    const block=document.createElement('div');block.className='ko-round';
+    block.innerHTML=`<div class="ko-round-title">${step.final?'★ FINAL ★':step.label}</div>`;
+    $('matches-col').appendChild(block);
+    let delay=0;
+    results.forEach((r,idx)=>{
+      setTimeout(()=>{
+        if(!G.simRunning)return;
+        const row=document.createElement('div');row.className='ko-match';
+        const usIn=r.t1===MY_TEAM||r.t2===MY_TEAM;
+        const win=r.winner===MY_TEAM;
+        row.innerHTML=`<div class="ko-team${r.t1===MY_TEAM?' us':''}">${r.t1}</div>
+          <div class="ko-agg ${usIn?(win?'win':'loss'):''}"><div>${r.score}</div>${r.pens?'<div class="ko-pens">(pens)</div>':''}</div>
+          <div class="ko-team${r.t2===MY_TEAM?' us':''}">${r.t2}</div>`;
+        block.appendChild(row);
+        row.scrollIntoView({behavior:'smooth',block:'nearest'});
+        // Update sidebar after each match
+        renderSidebar();
+        // After last match, continue
+        if(idx===results.length-1){
+          setTimeout(()=>{
+            if(!G.simRunning)return;
+            if(step.final){G.simRunning=false;setTimeout(showResult,800);}
+            else runNextSimStep();
+          },spd);
+        }
+      },delay);
+      delay+=spd;
+    });
+    // If no results (all byes), continue
+    if(!results.length){
+      if(step.final){G.simRunning=false;setTimeout(showResult,800);}
+      else runNextSimStep();
+    }
   }
   else if(step.type==='done'){G.simRunning=false;showResult();}
 }
@@ -1480,84 +1622,56 @@ function addPhaseHeader(label){
   const mc=$('matches-col');
   const h=document.createElement('div');h.className='phase-header';h.textContent=label;
   h.id='ph-'+label.replace(/\s/g,'-');mc.appendChild(h);
+  h.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-function renderGroupsUI(){
+
+function renderGroupMatchRow(grp,t1name,t2name,s1,s2,usIn){
   const mc=$('matches-col');
-  G.groups.forEach(grp=>{
-    const block=document.createElement('div');
-    block.innerHTML=`<div class="group-label">GROUP ${grp.name}</div>`;
-    grp.teams.forEach((t,i)=>{
-      const row=document.createElement('div');row.className='match-row shown';
-      row.style.cssText='display:grid;grid-template-columns:1fr 22px 22px 22px 30px;padding:6px 10px;font-size:11px;background:var(--card);border:1px solid var(--bg3);margin-bottom:3px;opacity:1;transform:none';
-      row.innerHTML=`<div style="font-weight:${t.isUs?700:500};color:${t.isUs?'var(--gold)':'var(--text)'}">${t.name}</div>
-        <div style="text-align:center;color:var(--text2)">${t.w}</div><div style="text-align:center;color:var(--text2)">${t.d}</div><div style="text-align:center;color:var(--text2)">${t.l}</div>
-        <div style="text-align:center;font-weight:700;color:${t.isUs?'var(--gold)':'var(--text)'}">${t.pts}</div>`;
-      if(i<2)row.style.borderLeft='3px solid var(--accent)';
-      block.appendChild(row);
-    });
-    mc.appendChild(block);
-  });
+  const block=document.getElementById('grp-block-'+grp.name)||mc.lastElementChild;
+  const usH=t1name===MY_TEAM,usA=t2name===MY_TEAM;
+  const win=(usH&&s1>s2)||(usA&&s2>s1),loss=(usH&&s1<s2)||(usA&&s2<s1);
+  const row=document.createElement('div');row.className='match-row';
+  row.innerHTML=`<div class="match-home${usH?' us':''}">${t1name}</div>
+    <div class="match-score ${usIn?(win?'win':loss?'loss':'draw'):''}">${s1}–${s2}</div>
+    <div class="match-away${usA?' us':''}">${t2name}</div>`;
+  block.appendChild(row);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>row.classList.add('shown')));
+  row.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
-function renderLeagueUI(){
+
+function renderGroupTable(grp){
+  // Render/update the live group standings below the match results
   const mc=$('matches-col');
-  const block=document.createElement('div');
-  block.innerHTML='<div class="group-label">YOUR MATCHES</div>';
-  (G.leagueMatches||[]).forEach(m=>{
-    const row=document.createElement('div');row.className='match-row';
-    const usH=m.t1===MY_TEAM,usA=m.t2===MY_TEAM;
-    const win=(usH&&m.s1>m.s2)||(usA&&m.s2>m.s1),loss=(usH&&m.s1<m.s2)||(usA&&m.s2<m.s1);
-    row.innerHTML=`<div class="match-home${usH?' us':''}">${m.t1}</div>
-      <div class="match-score ${win?'win':loss?'loss':'draw'}">${m.s1}–${m.s2}</div>
-      <div class="match-away${usA?' us':''}">${m.t2}</div>`;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>row.classList.add('shown')));
-    block.appendChild(row);
+  const block=document.getElementById('grp-block-'+grp.name)||mc.lastElementChild;
+  // Remove existing standings if present
+  const existing=block.querySelector('.live-group-table');
+  if(existing)existing.remove();
+  const tbl=document.createElement('div');tbl.className='live-group-table';
+  tbl.style.cssText='margin-top:8px;margin-bottom:4px';
+  tbl.innerHTML=`<div style="display:grid;grid-template-columns:1fr 22px 22px 22px 30px;padding:3px 10px;font-size:8px;letter-spacing:1px;color:var(--text3);font-weight:600;border-bottom:1px solid var(--bg3)">
+    <div>Club</div><div style="text-align:center">W</div><div style="text-align:center">D</div><div style="text-align:center">L</div><div style="text-align:center">Pts</div></div>`;
+  grp.teams.forEach((t,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText=`display:grid;grid-template-columns:1fr 22px 22px 22px 30px;padding:5px 10px;font-size:11px;border-bottom:1px solid var(--bg3);background:var(--card);${i<2?'border-left:3px solid var(--accent)':''}`;
+    row.innerHTML=`<div style="font-weight:${t.isUs?700:500};color:${t.isUs?'var(--gold)':'var(--text)'}">${t.name}</div>
+      <div style="text-align:center;color:var(--text2)">${t.w}</div>
+      <div style="text-align:center;color:var(--text2)">${t.d}</div>
+      <div style="text-align:center;color:var(--text2)">${t.l}</div>
+      <div style="text-align:center;font-weight:700;color:${t.isUs?'var(--gold)':'var(--text)'}">${t.pts}</div>`;
+    tbl.appendChild(row);
   });
-  mc.appendChild(block);
+  block.appendChild(tbl);
 }
-function renderPlayoffUI(){
-  const mc=$('matches-col');
-  const poRounds=G.koRounds.filter(r=>r.round==='Playoff');
-  if(!poRounds.length)return;
-  const block=document.createElement('div');
-  poRounds.forEach(r=>{
-    const row=document.createElement('div');row.className='match-row';
-    const usH=r.t1===MY_TEAM,usA=r.t2===MY_TEAM;
-    const win=(usH&&r.winner===r.t1)||(usA&&r.winner===r.t2);
-    row.innerHTML=`<div class="match-home${usH?' us':''}">${r.t1}</div>
-      <div class="match-score ${win&&(usH||usA)?'win':!win&&(usH||usA)?'loss':''}">${r.score}${r.pens?' (pens)':''}</div>
-      <div class="match-away${usA?' us':''}">${r.t2}</div>`;
-    requestAnimationFrame(()=>requestAnimationFrame(()=>row.classList.add('shown')));
-    block.appendChild(row);
-  });
-  mc.appendChild(block);
-}
-function renderKORound(roundKey,label,results,isFinal){
-  const mc=$('matches-col');
-  const block=document.createElement('div');block.className='ko-round';
-  block.innerHTML=`<div class="ko-round-title">${isFinal?'★ FINAL ★':label}</div>`;
-  results.forEach(r=>{
-    if(r.score==='bye')return;
-    const usIn=r.t1===MY_TEAM||r.t2===MY_TEAM;
-    const win=r.winner===MY_TEAM;
-    const row=document.createElement('div');row.className='ko-match';
-    row.innerHTML=`<div class="ko-team${r.t1===MY_TEAM?' us':''}">${r.t1}</div>
-      <div class="ko-agg ${usIn?(win?'win':'loss'):''}"><div>${r.score}</div>${r.pens?'<div class="ko-pens">(pens)</div>':''}</div>
-      <div class="ko-team${r.t2===MY_TEAM?' us':''}">${r.t2}</div>`;
-    block.appendChild(row);
-  });
-  mc.appendChild(block);
-  block.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
+
 function renderSidebar(){
   const body=$('lt-body');body.innerHTML='';
   if(G.tournFmt==='classic'){
     $('table-head').textContent='GROUP STANDINGS';
     G.groups.forEach(grp=>{
-      const gl=document.createElement('div');gl.className='lt-group-label';gl.textContent='GROUP '+grp.name;body.appendChild(gl);
-      const hdr=document.createElement('div');hdr.className='lt-header';hdr.innerHTML='<div></div><div>Club</div><div style="text-align:center">W</div><div style="text-align:center">D</div><div style="text-align:center">L</div><div style="text-align:center">Pts</div>';body.appendChild(hdr);
+      const gl=document.createElement('div');gl.className='lt-group-label';gl.textContent='GRP '+grp.name;body.appendChild(gl);
       grp.teams.forEach((t,i)=>{
         const d=document.createElement('div');d.className='lt-row'+(t.isUs?' us':'')+(i<2?' qualified':'');
-        d.innerHTML=`<div class="lt-pos">${i+1}</div><div class="lt-name${t.isUs?' us':''}">${t.name.length>12?t.name.slice(0,11)+'…':t.name}</div>
+        d.innerHTML=`<div class="lt-pos">${i+1}</div><div class="lt-name${t.isUs?' us':''}">${t.name.length>11?t.name.slice(0,10)+'…':t.name}</div>
           <div class="lt-num">${t.w}</div><div class="lt-num">${t.d}</div><div class="lt-num">${t.l}</div><div class="lt-pts">${t.pts}</div>`;
         body.appendChild(d);
       });
@@ -1568,7 +1682,7 @@ function renderSidebar(){
     G.leagueRows.slice(0,24).forEach((t,i)=>{
       const d=document.createElement('div');
       d.className='lt-row'+(t.isUs?' us':'')+(i<8?' qualified':'');
-      d.innerHTML=`<div class="lt-pos">${i+1}</div><div class="lt-name${t.isUs?' us':''}">${t.name.length>12?t.name.slice(0,11)+'…':t.name}</div>
+      d.innerHTML=`<div class="lt-pos">${i+1}</div><div class="lt-name${t.isUs?' us':''}">${t.name.length>11?t.name.slice(0,10)+'…':t.name}</div>
         <div class="lt-num">${t.w}</div><div class="lt-num">${t.d}</div><div class="lt-num">${t.l}</div><div class="lt-pts">${t.pts}</div>`;
       body.appendChild(d);
     });
@@ -1580,31 +1694,73 @@ function skipAll(){
   if(G.simTimer)clearTimeout(G.simTimer);G.simRunning=false;
   while(simQIdx<simQueue.length){
     const step=simQueue[simQIdx++];
-    if(step.type==='simGroups')simGroups();
-    else if(step.type==='renderGroups'){renderGroupsUI();renderSidebar();}
-    else if(step.type==='renderLeague'){renderLeagueUI();renderSidebar();}
-    else if(step.type==='playoff'){renderPlayoffUI();renderSidebar();}
+    if(step.type==='simAllOtherGroups'){
+      const usGrpName=G.groups.find(g=>g.teams.some(t=>t.isUs))?.name;
+      G.groups.forEach(grp=>{
+        if(grp.name===usGrpName)return;
+        const T=grp.teams;
+        for(let i=0;i<T.length;i++)for(let j=i+1;j<T.length;j++){
+          const t1=T[i],t2=T[j];
+          const[g1,g2]=simMatch(clStr(t1.name),clStr(t2.name));const[g3,g4]=simMatch(clStr(t2.name),clStr(t1.name));
+          const a1=g1+g4,a2=g2+g3;
+          if(a1>a2){t1.w++;t1.pts+=3;t2.l++;}else if(a1===a2){t1.d++;t1.pts++;t2.d++;t2.pts++;}else{t2.w++;t2.pts+=3;t1.l++;}
+          t1.gf+=a1;t1.ga+=a2;t2.gf+=a2;t2.ga+=a1;
+        }
+        grp.teams.sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+      });
+    }
+    else if(step.type==='groupHeader'){const mc=$('matches-col');const hdr=document.createElement('div');hdr.innerHTML=`<div class="group-label">GROUP ${step.grp.name} — YOUR GROUP</div>`;hdr.id='grp-block-'+step.grp.name;mc.appendChild(hdr);}
+    else if(step.type==='groupMatch'){
+      const grp=step.grp,T=grp.teams,t1=T[step.i],t2=T[step.j];
+      const s1=t1.isUs?myStr():clStr(t1.name),s2=t2.isUs?myStr():clStr(t2.name);
+      const[g1,g2]=simMatch(s1,s2);const[g3,g4]=simMatch(s2,s1);
+      const a1=g1+g4,a2=g2+g3;
+      if(a1>a2){t1.w++;t1.pts+=3;t2.l++;}else if(a1===a2){t1.d++;t1.pts++;t2.d++;t2.pts++;}else{t2.w++;t2.pts+=3;t1.l++;}
+      t1.gf+=a1;t1.ga+=a2;t2.gf+=a2;t2.ga+=a1;
+      if(t1.isUs)for(let k=0;k<a1;k++){const s=pickScorer();G.goalscorers[s]=(G.goalscorers[s]||0)+1;}
+      if(t2.isUs)for(let k=0;k<a2;k++){const s=pickScorer();G.goalscorers[s]=(G.goalscorers[s]||0)+1;}
+      grp.played.push({t1:t1.name,t2:t2.name,s1:a1,s2:a2,usIn:t1.isUs||t2.isUs});
+      grp.teams.sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+      renderGroupMatchRow(grp,t1.name,t2.name,a1,a2,t1.isUs||t2.isUs);
+    }
+    else if(step.type==='renderFinalGroupTable'||step.type==='renderFinalLeagueTable'){renderSidebar();}
+    else if(step.type==='leagueHeader'){const mc=$('matches-col');const h=document.createElement('div');h.innerHTML='<div class="group-label">YOUR 8 LEAGUE PHASE MATCHES</div>';h.id='league-matches-block';mc.appendChild(h);}
+    else if(step.type==='leagueMatch'){
+      const m=G.leagueMatches[step.idx];if(!m)continue;
+      const mc=$('matches-col');const block=document.getElementById('league-matches-block')||mc.lastElementChild;
+      const row=document.createElement('div');row.className='match-row shown';
+      const usH=m.t1===MY_TEAM,usA=m.t2===MY_TEAM;
+      const win=(usH&&m.s1>m.s2)||(usA&&m.s2>m.s1),loss=(usH&&m.s1<m.s2)||(usA&&m.s2<m.s1);
+      row.innerHTML=`<div class="match-home${usH?' us':''}">${m.t1}</div><div class="match-score ${win?'win':loss?'loss':'draw'}">${m.s1}–${m.s2}</div><div class="match-away${usA?' us':''}">${m.t2}</div>`;
+      block.appendChild(row);
+    }
     else if(step.type==='header')addPhaseHeader(step.label);
-    else if(step.type==='ko'){
-      const teams=step.getTeams();const results=[];
-      const shuffled=[...teams].sort(()=>Math.random()-.5);
+    else if(step.type==='koRound'){
+      const teams=step.getTeams();const shuffled=[...teams].sort(()=>Math.random()-.5);
+      const block=document.createElement('div');block.className='ko-round';
+      block.innerHTML=`<div class="ko-round-title">${step.final?'★ FINAL ★':step.label}</div>`;
+      $('matches-col').appendChild(block);
       for(let i=0;i<shuffled.length;i+=2){
-        const t1=shuffled[i],t2=shuffled[i+1];
-        if(!t2){G.koRounds.push({round:step.round,t1,t2:t1,winner:t1,loser:'',score:'bye',pens:false,usIn:t1===MY_TEAM});continue;}
-        const s1=t1===MY_TEAM?myStr():clStr(t1);const s2=t2===MY_TEAM?myStr():clStr(t2);
-        const isF=step.final;
+        const t1=shuffled[i],t2=shuffled[i+1];if(!t2){G.koRounds.push({round:step.round,t1,t2:t1,winner:t1,loser:'',score:'bye',pens:false,usIn:t1===MY_TEAM});continue;}
+        const s1=t1===MY_TEAM?myStr():clStr(t1),s2=t2===MY_TEAM?myStr():clStr(t2);
         let res;
-        if(isF){const[g1,g2]=simMatchNeutral(s1,s2);const w1=g1>g2||(g1===g2&&Math.random()>.5);res={win1:w1,score:`${g1}–${g2}`,pens:g1===g2};}
+        if(step.final){const[g1,g2]=simMatchNeutral(s1,s2);const w1=g1>g2||(g1===g2&&Math.random()>.5);res={win1:w1,score:`${g1}–${g2}`,pens:g1===g2};}
         else res=simKOTwoLegs(s1,s2);
         const winner=res.win1?t1:t2;const loser=res.win1?t2:t1;
         const usIn=t1===MY_TEAM||t2===MY_TEAM;
         G.koRounds.push({round:step.round,t1,t2,winner,loser,score:res.score,pens:res.pens,usIn});
-        results.push({t1,t2,winner,score:res.score,pens:res.pens,usIn});
         if(usIn){const goals=parseInt(res.score.split('–')[0])||0;for(let k=0;k<goals;k++){const s=pickScorer();G.goalscorers[s]=(G.goalscorers[s]||0)+1;}}
+        const row=document.createElement('div');row.className='ko-match';
+        const win=winner===MY_TEAM;
+        row.innerHTML=`<div class="ko-team${t1===MY_TEAM?' us':''}">${t1}</div>
+          <div class="ko-agg ${usIn?(win?'win':'loss'):''}"><div>${res.score}</div>${res.pens?'<div class="ko-pens">(pens)</div>':''}</div>
+          <div class="ko-team${t2===MY_TEAM?' us':''}">${t2}</div>`;
+        block.appendChild(row);
       }
-      renderKORound(step.round,step.label||step.round,results,step.final);renderSidebar();
     }
   }
+  renderGroupTable(G.groups?.find(g=>g.teams.some(t=>t.isUs)));
+  renderSidebar();
   setTimeout(showResult,300);
 }
 $('btn-skip').addEventListener('click',skipAll);
@@ -1626,10 +1782,12 @@ function showResult(){
     journey.push({round:'LEAGUE PHASE',result:status,win:!lr.eliminated});
     if(lr.eliminated)eliminated=true;
   }
-  // KO rounds
-  G.koRounds.filter(r=>r.usIn).forEach(r=>{
+  // KO rounds — show opponent name for each
+  G.koRounds.filter(r=>r.usIn&&r.score!=='bye').forEach(r=>{
     const win=r.winner===MY_TEAM;
-    journey.push({round:r.round.toUpperCase(),result:win?`Won ${r.score}${r.pens?' (pens)':''}`:`Lost ${r.score}${r.pens?' (pens)':''}`,win});
+    const opp=r.t1===MY_TEAM?r.t2:r.t1;
+    const roundLabel={Playoff:'PLAYOFF',R16:'ROUND OF 16',QF:'QUARTER-FINAL',SF:'SEMI-FINAL',Final:'FINAL'}[r.round]||r.round.toUpperCase();
+    journey.push({round:roundLabel,result:win?`Won vs ${opp} (${r.score}${r.pens?' pens':''})`: `Lost vs ${opp} (${r.score}${r.pens?' pens':''})`,win});
     if(!win)eliminated=true;
     if(win&&r.round==='Final')finalResult='CHAMPION';
   });
