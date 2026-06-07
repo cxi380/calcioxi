@@ -1,0 +1,2687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Calcio XI — Build the Greatest Serie A XI</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#c8922a;--gold-dim:rgba(200,146,42,0.1);--gold-border:rgba(200,146,42,0.45);
+  --bg:#f2efe8;--bg2:#e8e3da;--bg3:#d8d2c6;--bg4:#c4bdb0;
+  --card:#ffffff;
+  --text:#1a1714;--text2:#5a5040;--text3:#9a9080;
+  --green:#1a4a2e;--green2:#2a6a42;
+  --serif:'EB Garamond',serif;--sans:'Oswald',sans-serif;
+  --shadow:0 2px 16px rgba(0,0,0,0.07);
+  --bar:60px;
+}
+[data-theme="dark"]{
+  --bg:#0f1117;--bg2:#181b24;--bg3:#242836;--bg4:#343a4d;
+  --card:#1c2030;
+  --text:#e8e4dc;--text2:#9a9488;--text3:#5a5a6a;
+  --green:#3a9a58;--green2:#4aba6a;
+  --shadow:0 2px 16px rgba(0,0,0,0.4);
+  --card-hover:#252a3a;--card-sel:#1e2840;
+}
+:root{--card-hover:#fffdf9;--card-sel:#fffdf9}
+/* dark mode pitch stripes */
+[data-theme="dark"] #pitch-svg rect:first-child,[data-theme="dark"] #squad-svg rect:first-child{filter:brightness(0.7)}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+.screen{display:none;background:var(--bg)}
+.screen.active{display:flex;flex-direction:column;min-height:100vh;background:var(--bg)}
+
+/* ═══════════════════════════════════════
+   INTRO
+═══════════════════════════════════════ */
+#s-intro{align-items:center;justify-content:center;text-align:center;padding:48px 24px;gap:28px;min-height:100vh}
+.intro-badge{font-size:11px;letter-spacing:5px;color:var(--text3);border:1px solid var(--bg4);padding:6px 18px;display:inline-block}
+.intro-logo{font-size:80px;font-weight:700;letter-spacing:8px;color:var(--green);line-height:1}
+.intro-tagline{font-family:var(--serif);font-style:italic;font-size:20px;color:var(--text2);max-width:500px;line-height:1.6}
+.intro-divider{width:56px;height:2px;background:var(--gold);margin:0 auto}
+.section-label{font-size:11px;letter-spacing:4px;color:var(--text3);margin-bottom:12px;font-weight:600}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:540px;width:100%}
+.mode-card{background:var(--card);border:2px solid var(--bg3);padding:22px 18px;cursor:pointer;transition:all .2s;text-align:center}
+.mode-card:hover{border-color:var(--gold-border);background:var(--card-hover)}
+.mode-card.sel{border-color:var(--gold);background:var(--card-sel)}
+.mode-card-title{font-size:16px;font-weight:600;letter-spacing:2px;margin-bottom:8px}
+.mode-card-desc{font-family:var(--serif);font-size:14px;color:var(--text2);line-height:1.5}
+.formations{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:520px}
+.f-btn{font-family:var(--sans);font-size:15px;font-weight:500;letter-spacing:2px;color:var(--text);background:var(--card);border:2px solid var(--bg3);padding:12px 22px;cursor:pointer;transition:all .2s}
+.f-btn:hover{border-color:var(--gold-border);color:var(--green)}
+.f-btn.sel{border-color:var(--gold);color:var(--green);background:var(--card-sel);font-weight:700}
+.options-row{display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center}
+.toggle-wrap{display:flex;align-items:center;gap:9px;font-size:12px;letter-spacing:2px;color:var(--text3);cursor:pointer;user-select:none;padding:4px 0}
+.tog{width:38px;height:20px;background:var(--bg3);border-radius:10px;position:relative;transition:.2s;flex-shrink:0}
+.tog.on{background:var(--gold)}
+.tog::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:2px;left:2px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.tog.on::after{left:20px}
+.cta{font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:5px;background:var(--green);color:#fff;border:none;padding:18px 56px;cursor:pointer;transition:all .2s;opacity:.3;pointer-events:none}
+.cta.on{opacity:1;pointer-events:all}
+.cta:hover{background:var(--green2)}
+
+/* ═══════════════════════════════════════
+   SHARED TOP BAR
+═══════════════════════════════════════ */
+.topbar{height:var(--bar);display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:2px solid var(--bg3);background:var(--card);flex-shrink:0;box-shadow:var(--shadow);z-index:10}
+.topbar-title{font-size:20px;font-weight:700;letter-spacing:5px;color:var(--green)}
+.topbar-right{display:flex;align-items:center;gap:16px}
+.topbar-prog{font-size:12px;letter-spacing:3px;color:var(--text3);font-weight:600}
+
+/* ═══════════════════════════════════════
+   DRAFT — 2 COLUMN LAYOUT
+   LEFT: wide pitch + overall (no right col)
+   RIGHT: spin/lock bar at top, then spinner OR players below
+═══════════════════════════════════════ */
+#s-draft.active{height:100vh;overflow:hidden;display:grid;grid-template-rows:var(--bar) 1fr}
+.draft-main{display:grid;grid-template-columns:480px 1fr;overflow:hidden;height:100%}
+
+/* LEFT: pitch + overall (wider, bigger pitch) */
+.left-col{border-right:2px solid var(--bg3);background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;overflow:hidden}
+#pitch-svg{width:100%;max-width:420px;height:auto;display:block;filter:drop-shadow(0 4px 20px rgba(0,0,0,0.13))}
+
+/* overall box */
+.overall-box{background:var(--card);border:2px solid var(--bg3);padding:12px 18px;max-width:420px;width:100%;box-shadow:var(--shadow)}
+.ob-title{font-size:10px;letter-spacing:4px;color:var(--text3);margin-bottom:10px;font-weight:600}
+.ob-main{display:flex;align-items:center;gap:18px}
+.ob-rating{font-size:48px;font-weight:700;color:var(--green);line-height:1;min-width:68px}
+.ob-bars{flex:1}
+.ob-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.ob-bar-label{font-size:10px;letter-spacing:1px;color:var(--text3);width:30px;flex-shrink:0}
+.ob-bar-track{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.ob-bar-fill{height:100%;background:var(--green);border-radius:3px;transition:width .4s}
+.ob-bar-val{font-size:11px;font-weight:700;color:var(--text2);width:24px;text-align:right;flex-shrink:0}
+.ob-count{font-size:10px;color:var(--text3);letter-spacing:1px;margin-top:6px}
+
+/* RIGHT: full column — action bar at top, content below */
+.pitch-col{background:var(--card);display:flex;flex-direction:column;overflow:hidden}
+
+/* Action bar — SPIN + LOCK IN always at top of right col */
+.draft-action-bar{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:2px solid var(--bg3);flex-shrink:0;background:var(--card)}
+.draft-action-bar .spin-btn{flex:1;font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:4px;background:var(--green);color:#fff;border:none;padding:14px;cursor:pointer;transition:all .2s}
+.draft-action-bar .spin-btn:hover{background:var(--green2)}
+.draft-action-bar .spin-btn:disabled{opacity:.35;cursor:not-allowed}
+.draft-action-bar .lock-btn{flex:1;font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:3px;background:var(--green);color:#fff;border:none;padding:14px;cursor:pointer;transition:all .2s;opacity:.3;pointer-events:none}
+.draft-action-bar .lock-btn.on{opacity:1;pointer-events:all}
+.draft-action-bar .lock-btn:hover{background:var(--green2)}
+.draft-action-bar .respin-btn{font-family:var(--sans);font-size:12px;font-weight:500;letter-spacing:2px;background:transparent;color:var(--text2);border:1px solid var(--bg3);padding:14px 16px;cursor:pointer;transition:all .2s;opacity:.3;pointer-events:none;white-space:nowrap;flex-shrink:0}
+.draft-action-bar .respin-btn.on{opacity:1;pointer-events:all}
+.draft-action-bar .respin-btn:hover{border-color:var(--gold-border);color:var(--green)}
+.draft-prog-bar{font-size:11px;letter-spacing:2px;color:var(--text3);font-weight:600;flex-shrink:0}
+
+/* Spinner panel — slot machine, inside right col */
+.spinner-panel{display:flex;flex-direction:column;align-items:stretch;flex:1;overflow:hidden}
+.spinner-panel.hidden{display:none}
+.spin-zone{padding:32px 24px 24px;flex-shrink:0;display:flex;flex-direction:column;align-items:stretch;gap:14px}
+.spin-eyebrow{font-size:10px;letter-spacing:4px;color:var(--text3);font-weight:600;text-align:center}
+
+/* Team revealed — shows after spin lands, inside spinner panel, before player panel shows */
+.team-revealed{display:flex;align-items:center;gap:14px;padding:16px 24px;border-top:2px solid var(--bg3);background:var(--bg2);flex-shrink:0}
+.team-revealed.hidden{display:none}
+.tr-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.tr-name{font-size:20px;font-weight:700;color:var(--green);letter-spacing:1px}
+.tr-season{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--text2);margin-left:4px}
+.tr-tier{font-size:9px;letter-spacing:1px;padding:3px 8px;margin-left:auto;flex-shrink:0}
+
+/* Player panel */
+.player-panel{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.player-panel.hidden{display:none}
+.rc-head{padding:12px 20px 10px;border-bottom:1px solid var(--bg3);flex-shrink:0}
+.rc-eyebrow{font-size:9px;letter-spacing:4px;color:var(--text3);margin-bottom:3px;font-weight:600}
+.rc-team-label{font-size:16px;font-weight:600;color:var(--green);letter-spacing:.5px}
+.rc-season-label{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--text2)}
+
+/* Slot machine */
+.slot-machine{position:relative;height:120px;overflow:hidden;border:2px solid var(--bg3);background:var(--bg2)}
+.slot-machine::before,.slot-machine::after{content:'';position:absolute;left:0;right:0;height:30px;z-index:2;pointer-events:none}
+.slot-machine::before{top:0;background:linear-gradient(to bottom,var(--bg2),transparent)}
+.slot-machine::after{bottom:0;background:linear-gradient(to top,var(--bg2),transparent)}
+.slot-highlight{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);height:40px;border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);background:rgba(200,146,42,0.07);z-index:1;pointer-events:none}
+.slot-track{position:absolute;left:0;right:0;top:0;will-change:transform}
+.slot-item{height:40px;display:flex;align-items:center;gap:10px;padding:0 14px;flex-shrink:0}
+.slot-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.slot-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;color:var(--text)}
+.slot-year{font-size:12px;color:var(--text3);font-weight:500;flex-shrink:0}
+.slot-item.active .slot-name{color:var(--green)}
+.slot-item.active .slot-year{color:var(--gold)}
+
+/* Team list (squad-first) */
+.team-scroll{flex:1;overflow-y:auto;padding:10px}
+.lc-eyebrow{font-size:10px;letter-spacing:4px;color:var(--text3);font-weight:600;margin-bottom:8px;padding:12px 16px 0}
+.era-select{font-family:var(--sans);font-size:12px;background:var(--bg2);color:var(--text);border:1px solid var(--bg3);padding:8px 10px;width:calc(100% - 20px);margin:0 10px 10px;letter-spacing:1px}
+.team-card{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--bg3);background:var(--bg2);margin-bottom:6px;cursor:pointer;transition:all .15s;min-height:52px}
+.team-card:hover{border-color:var(--gold-border);background:var(--card)}
+.team-card.sel{border-color:var(--gold);background:var(--card-sel)}
+.tc-badge{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;color:#fff;letter-spacing:.5px}
+.tc-info{flex:1;min-width:0}
+.tc-name{font-size:13px;font-weight:600;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tc-season{font-family:var(--serif);font-size:12px;color:var(--text2)}
+.tc-tier{font-size:9px;letter-spacing:1px;padding:3px 7px;flex-shrink:0}
+
+/* player table */
+.player-table{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.pt-row{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--bg2);transition:background .1s;min-height:56px}
+.pt-row:not(.used){cursor:pointer}
+.pt-row:not(.used):hover,.pt-row:not(.used):active{background:var(--bg2)}
+.pt-row.sel{background:var(--card-sel);border-left:3px solid var(--gold);padding-left:13px}
+.pt-row.used{opacity:.35;pointer-events:none}
+.pt-rat-badge{width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pt-rat-num{font-size:16px;font-weight:700;color:#fff;transition:opacity .2s}
+.pt-rat-num.hidden{opacity:0}
+.pt-player-info{flex:1;min-width:0}
+.pt-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pt-club{font-size:11px;color:var(--text3);letter-spacing:.5px;margin-top:2px}
+.pt-badges{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0;max-width:100px}
+.pos-badge{font-size:9px;font-weight:700;letter-spacing:.5px;padding:3px 6px;border-radius:3px;background:var(--green);color:#fff;white-space:nowrap}
+.used-badge{background:var(--bg3);color:var(--text3)}
+.slot-picker{padding:10px 20px;background:var(--card-sel);border-bottom:2px solid var(--gold-border);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.slot-picker-label{font-size:10px;letter-spacing:2px;color:var(--text3);margin-right:4px;white-space:nowrap;font-weight:600}
+.slot-pick-btn{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:1px;background:var(--bg3);color:var(--text);border:1px solid var(--bg4);padding:7px 14px;cursor:pointer;border-radius:3px;transition:all .15s}
+.slot-pick-btn:hover,.slot-pick-btn:active,.slot-pick-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* ═══════════════════════════════════════
+   SQUAD SCREEN
+═══════════════════════════════════════ */
+#s-squad.active{display:grid;grid-template-rows:auto 1fr auto;height:100vh;overflow:hidden}
+.squad-head{text-align:center;padding:24px 20px 18px;border-bottom:2px solid var(--bg3);background:var(--card);flex-shrink:0}
+.squad-head h1{font-size:36px;font-weight:700;letter-spacing:7px;color:var(--green)}
+.squad-head p{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--text2);margin-top:5px}
+.squad-body{display:grid;grid-template-columns:1fr 320px;overflow:hidden}
+.squad-pitch{display:flex;align-items:center;justify-content:center;padding:20px;background:var(--bg)}
+#squad-svg{width:100%;max-width:380px;height:auto;display:block;filter:drop-shadow(0 4px 20px rgba(0,0,0,0.1))}
+.squad-right{padding:18px;overflow-y:auto;border-left:2px solid var(--bg3);background:var(--card);display:flex;flex-direction:column;gap:14px}
+.r-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bg2)}
+.r-pos{font-size:10px;letter-spacing:2px;color:var(--gold);width:32px;flex-shrink:0;font-weight:700}
+.r-name{font-size:13px;font-weight:600;flex:1}
+.r-club{font-family:var(--serif);font-style:italic;font-size:11px;color:var(--text2)}
+.r-rat{font-size:12px;font-weight:700;color:var(--green);flex-shrink:0}
+.squad-overall-box{background:var(--bg2);border:1px solid var(--bg3);padding:14px}
+.squad-foot{display:flex;gap:12px;padding:16px;border-top:2px solid var(--bg3);background:var(--card);flex-shrink:0}
+.sim-btn{font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:4px;background:var(--green);color:#fff;border:none;padding:15px;flex:1;cursor:pointer;transition:all .2s}
+.sim-btn:hover{background:var(--green2)}
+.rst-btn{font-family:var(--sans);font-size:12px;letter-spacing:2px;background:transparent;color:var(--text3);border:2px solid var(--bg3);padding:15px 20px;cursor:pointer;transition:all .2s}
+.rst-btn:hover,.rst-btn:active{color:var(--text);border-color:var(--bg4)}
+
+/* ═══════════════════════════════════════
+   SEASON
+═══════════════════════════════════════ */
+#s-season.active{display:grid;grid-template-rows:var(--bar) 1fr;height:100vh;overflow:hidden}
+.sbar{height:var(--bar);display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:2px solid var(--bg3);background:var(--card);flex-shrink:0;box-shadow:var(--shadow)}
+.sbar-title{font-size:18px;font-weight:700;letter-spacing:4px;color:var(--green)}
+.sbar-right{display:flex;align-items:center;gap:14px}
+.speed-wrap{font-size:11px;letter-spacing:2px;color:var(--text3);display:flex;align-items:center;gap:8px}
+.speed-wrap select{font-family:var(--sans);font-size:12px;background:var(--bg2);color:var(--text);border:1px solid var(--bg3);padding:5px 8px}
+.skip-btn{font-family:var(--sans);font-size:11px;letter-spacing:2px;background:transparent;color:var(--text3);border:1px solid var(--bg3);padding:7px 16px;cursor:pointer;transition:all .2s}
+.skip-btn:hover{color:var(--text)}
+.season-main{display:grid;grid-template-columns:1fr 320px;overflow:hidden;height:100%}
+.matches-col{overflow-y:auto;padding:14px;-webkit-overflow-scrolling:touch}
+.gw-block{margin-bottom:18px}
+.gw-label{font-size:10px;letter-spacing:4px;color:var(--text3);margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--bg3);font-weight:600}
+.match-row{display:flex;align-items:stretch;margin-bottom:4px;background:var(--card);border:1px solid var(--bg3);overflow:hidden;opacity:0;transform:translateY(3px);transition:opacity .22s,transform .22s;box-shadow:0 1px 4px rgba(0,0,0,0.04)}
+.match-row.shown{opacity:1;transform:none}
+.match-home{flex:1;text-align:right;padding:8px 12px;font-size:12px;font-weight:500}
+.match-home.us{color:var(--green);font-weight:700}
+.match-score{padding:6px 12px;background:var(--bg2);font-size:13px;font-weight:700;letter-spacing:2px;min-width:60px;text-align:center;flex-shrink:0;border-left:1px solid var(--bg3);border-right:1px solid var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center}
+.match-score.win{color:#2e7d32}
+.match-score.loss{color:#c62828}
+.match-score.draw{color:#5a5040}
+.match-scorers{font-size:8px;color:var(--text3);line-height:1.4;margin-top:2px;font-family:var(--serif);font-style:italic}
+.match-away{flex:1;padding:8px 12px;font-size:12px;font-weight:500}
+.match-away.us{color:var(--green);font-weight:700}
+.table-col{border-left:2px solid var(--bg3);display:flex;flex-direction:column;overflow:hidden;background:var(--card)}
+.table-head{padding:12px 14px;border-bottom:2px solid var(--bg3);font-size:10px;letter-spacing:4px;color:var(--text3);font-weight:600}
+.league-table{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.lt-header{display:grid;grid-template-columns:22px 1fr 26px 26px 26px 32px;padding:6px 12px;font-size:9px;letter-spacing:2px;color:var(--text3);border-bottom:1px solid var(--bg3);font-weight:600}
+.lt-row{display:grid;grid-template-columns:22px 1fr 26px 26px 26px 32px;padding:6px 12px;font-size:11px;border-bottom:1px solid var(--bg2);transition:background .2s}
+.lt-row.us{background:var(--card-sel);border-left:3px solid var(--gold)}
+.lt-row.champion{border-left:3px solid var(--green)}
+.lt-pos{color:var(--text3);font-size:10px}
+.lt-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:4px}
+.lt-name.us{color:var(--green);font-weight:700}
+.lt-num{text-align:center;color:var(--text2)}
+.lt-pts{text-align:center;font-weight:700}
+.lt-row.us .lt-pts{color:var(--green)}
+
+/* ═══════════════════════════════════════
+   RESULT
+═══════════════════════════════════════ */
+#s-result.active{align-items:center;justify-content:flex-start;padding:40px 24px 48px;gap:18px;background:var(--bg);overflow-y:auto}
+.res-top{text-align:center;width:100%}
+.res-trophy{font-size:80px;display:block;animation:pop .6s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop{from{transform:scale(0) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}
+.res-record{font-size:56px;font-weight:700;letter-spacing:6px;color:var(--green);animation:up .4s .2s both}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.res-tagline{font-family:var(--serif);font-style:italic;font-size:22px;color:var(--text2);animation:up .4s .32s both}
+.res-stats{display:flex;gap:36px;animation:up .4s .44s both;justify-content:center;flex-wrap:wrap}
+.res-stat{text-align:center}
+.res-stat-n{font-size:40px;font-weight:700;color:var(--green)}
+.res-stat-l{font-size:10px;letter-spacing:4px;color:var(--text3);margin-top:3px}
+.res-body{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;max-width:960px;width:100%;animation:up .4s .56s both}
+.res-card{background:var(--card);border:2px solid var(--bg3);padding:16px 18px;box-shadow:var(--shadow)}
+.res-card-title{font-size:10px;letter-spacing:4px;color:var(--text3);margin-bottom:12px;font-weight:600}
+.res-player{display:flex;align-items:center;padding:5px 0;border-bottom:1px solid var(--bg2);font-size:12px;gap:6px}
+.res-player:last-child{border:none}
+.res-player-pos{color:var(--gold);width:30px;font-size:9px;letter-spacing:1px;font-weight:700;flex-shrink:0}
+.res-player-name{flex:1;font-weight:500}
+.res-player-rat{color:var(--green);font-weight:700;flex-shrink:0}
+.pos-compare{display:flex;align-items:center;justify-content:center;gap:24px;padding:12px 0}
+.pos-block{text-align:center}
+.pos-num{font-size:52px;font-weight:700;line-height:1}
+.pos-lbl{font-size:10px;letter-spacing:3px;color:var(--text3);margin-top:3px}
+.pos-arrow{font-size:28px;color:var(--text3)}
+.scorer-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bg2);font-size:12px}
+.scorer-row:last-child{border:none}
+.scorer-goals{font-size:20px;font-weight:700;color:var(--green);width:30px;flex-shrink:0;text-align:center}
+.scorer-name{flex:1;font-weight:500}
+.res-msg{max-width:880px;width:100%;font-family:var(--serif);font-size:17px;line-height:1.75;color:var(--text2);text-align:center;animation:up .4s .68s both}
+.play-again{font-family:var(--sans);font-size:13px;font-weight:700;letter-spacing:5px;background:var(--green);color:#fff;border:none;padding:17px 52px;cursor:pointer;animation:up .4s .78s both;transition:all .2s}
+.play-again:hover{background:var(--green2)}
+
+/* ═══════════════════════════════════════
+   SCROLLBARS
+═══════════════════════════════════════ */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px}
+#confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:999}
+
+/* dark mode toggle */
+.dm-btn{font-family:var(--sans);font-size:18px;background:none;border:none;cursor:pointer;padding:4px 6px;line-height:1;opacity:.7;transition:opacity .2s;flex-shrink:0}
+.dm-btn:hover{opacity:1}
+
+/* share / save buttons */
+.res-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;animation:up .4s .85s both}
+.share-btn,.save-btn{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:2px;border:none;padding:13px 28px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px}
+.share-btn{background:var(--green);color:#fff}
+.share-btn:hover{background:var(--green2)}
+.save-btn{background:var(--card);color:var(--green);border:2px solid var(--green)}
+.save-btn:hover{background:var(--bg2)}
+
+/* share card (hidden canvas target) */
+#share-canvas{display:none}
+
+/* ═══ MOBILE SIM BAR ═══ */
+.mob-sim-bar{display:none;flex-direction:column;gap:6px;padding:10px 14px;background:var(--card);border-bottom:2px solid var(--bg3);flex-shrink:0;position:sticky;top:0;z-index:20;box-shadow:var(--shadow)}
+.mob-sim-progress{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.mob-sim-fill{height:100%;background:var(--green);border-radius:2px;transition:width .3s;width:0%}
+.mob-sim-label{font-size:10px;letter-spacing:2px;color:var(--text3);font-weight:600}
+.mob-sim-skip{font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:2px;background:var(--green);color:#fff;border:none;padding:9px;cursor:pointer;width:100%}
+.mob-sim-skip:hover{background:var(--green2)}
+
+/* ═══ POSITION COLOUR SYSTEM ═══ */
+/* Each position group gets its own colour — badge bg matches rating badge */
+.pos-col-gk{background:#b35c00!important}          /* amber — GK */
+.pos-col-def{background:#1a4a8f!important}          /* blue — CB RB LB RWB LWB */
+.pos-col-mid{background:#1a5c38!important}          /* green — CM CDM RM LM */
+.pos-col-att{background:#7b2020!important}          /* red — CAM RAM LAM RW LW ST */
+/* used badge stays grey */
+.used-badge{background:var(--bg3)!important;color:var(--text3)!important}
+
+@media(max-width:700px){
+  .mob-sim-bar{display:flex}
+  .sbar .speed-wrap{display:none}
+  .sbar .skip-btn{display:none}
+}
+
+.mob-tabs{display:none;background:var(--card);border-bottom:2px solid var(--bg3);flex-shrink:0}
+.mob-tabs-inner{display:flex}
+.mob-tab{flex:1;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:2px;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:11px 4px;cursor:pointer;transition:all .15s;text-align:center}
+.mob-tab.active{color:var(--green);border-bottom-color:var(--green)}
+
+/* Mobile season tabs */
+.mob-season-tabs{display:none;background:var(--card);border-bottom:2px solid var(--bg3);flex-shrink:0}
+.mob-season-tab{flex:1;font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:2px;color:var(--text3);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:11px 4px;cursor:pointer;text-align:center}
+.mob-season-tab.active{color:var(--green);border-bottom-color:var(--green)}
+
+/* ═══════════════════════════════════════
+   MOBILE — ≤ 700px
+═══════════════════════════════════════ */
+@media (max-width:700px){
+  /* Intro */
+  #s-intro{padding:28px 16px;gap:20px}
+  .intro-logo{font-size:52px;letter-spacing:4px}
+  .intro-tagline{font-size:16px}
+  .mode-grid{grid-template-columns:1fr;gap:10px;max-width:400px}
+  .mode-card{padding:18px 16px}
+  .mode-card-desc{display:block;font-size:13px}
+  .mode-card-title{font-size:15px}
+  .f-btn{padding:10px 14px;font-size:13px}
+  .cta{padding:15px 36px;font-size:13px;letter-spacing:3px;width:100%;max-width:400px}
+
+  /* Draft: single scrollable column on mobile — no tabs */
+  #s-draft.active{grid-template-rows:var(--bar) 1fr;height:auto;min-height:100vh;overflow:auto}
+  .mob-tabs{display:none} /* hide tabs completely */
+  .draft-main{display:flex;flex-direction:column;height:auto;overflow:visible}
+  /* right col (spin/players) comes first, pitch below */
+  .left-col,.pitch-col{position:static;display:flex !important;width:100%}
+  .pitch-col{flex-direction:column;order:1;border-right:none;border-bottom:2px solid var(--bg3)}
+  .left-col{flex-direction:column;order:2;align-items:center;padding:16px;background:var(--bg);gap:12px;justify-content:flex-start}
+  #pitch-svg{max-width:340px;width:100%}
+  .overall-box{max-width:340px;width:100%}
+  .draft-action-bar{flex-wrap:wrap;gap:8px;padding:10px 12px}
+  .draft-action-bar .spin-btn,.draft-action-bar .lock-btn{flex:1;min-width:100px;font-size:12px;padding:12px}
+  .draft-action-bar .respin-btn{font-size:10px;padding:12px 10px}
+  .spinner-panel,.player-panel{max-height:none}
+  /* pitch svg compact on mobile */
+  .left-col #pitch-svg{max-width:300px}
+
+  /* Squad: stacked */
+  #s-squad.active{height:auto;min-height:100vh;grid-template-rows:auto auto 1fr auto;overflow:auto}
+  .squad-body{grid-template-columns:1fr;overflow:visible}
+  .squad-pitch{padding:14px;order:1}
+  #squad-svg{max-width:300px}
+  .squad-right{border-left:none;border-top:2px solid var(--bg3);order:2;padding:14px;max-height:none;overflow:visible}
+  .squad-head h1{font-size:26px;letter-spacing:4px}
+
+  /* Season: table behind tab */
+  #s-season.active{grid-template-rows:var(--bar) auto 1fr}
+  .mob-season-tabs{display:flex}
+  .season-main{grid-template-columns:1fr;position:relative}
+  .table-col{position:absolute;inset:0;z-index:5;display:none}
+  .table-col.mob-visible{display:flex}
+  .sbar-title{font-size:14px;letter-spacing:2px}
+  .speed-wrap{display:none}
+  .skip-btn{font-size:10px;padding:6px 10px;letter-spacing:1px}
+
+  /* Result: single col */
+  .res-body{grid-template-columns:1fr}
+  .res-record{font-size:38px;letter-spacing:3px}
+  .res-tagline{font-size:17px}
+  .res-stats{gap:20px}
+  .res-stat-n{font-size:32px}
+  #s-result.active{padding:28px 16px 40px;gap:14px}
+}
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+
+<!-- ══════ INTRO ══════ -->
+<div id="s-intro" class="screen active">
+  <div class="intro-badge">Serie A · All Eras · 1990–2024</div>
+  <div class="intro-logo">CALCIO XI</div>
+  <div class="intro-tagline">Spin the slot, draft a real Serie A squad, and chase a perfect 38-0 season.</div>
+  <div class="intro-divider"></div>
+  <div style="width:100%;max-width:540px">
+    <div class="section-label">Choose your draft style</div>
+    <div class="mode-grid" id="mode-grid">
+      <div class="mode-card" data-m="position">
+        <div class="mode-card-title">SPIN &amp; PICK</div>
+        <div class="mode-card-desc">Spin to get a random team — then pick any player from their squad, choosing which open position to fill.</div>
+      </div>
+      <div class="mode-card" data-m="squad">
+        <div class="mode-card-title">SQUAD FIRST</div>
+        <div class="mode-card-desc">Choose a real Serie A team and season, then fill each position from that squad's roster.</div>
+      </div>
+    </div>
+  </div>
+  <div style="width:100%;max-width:540px">
+    <div class="section-label">Choose your formation</div>
+    <div class="formations" id="formations">
+      <button class="f-btn" data-f="4-3-3">4-3-3</button>
+      <button class="f-btn" data-f="4-4-2">4-4-2</button>
+      <button class="f-btn" data-f="3-5-2">3-5-2</button>
+      <button class="f-btn" data-f="4-2-3-1">4-2-3-1</button>
+      <button class="f-btn" data-f="5-3-2">5-3-2</button>
+      <button class="f-btn" data-f="3-4-3">3-4-3</button>
+    </div>
+  </div>
+  <div class="options-row">
+    <label class="toggle-wrap"><div class="tog on" id="rat-tog"></div>SHOW RATINGS</label>
+    <button class="dm-btn" id="dm-tog-intro" title="Toggle dark mode">🌙</button>
+  </div>
+  <button class="cta" id="btn-start">LET'S GO →</button>
+  <a href="https://buymeacoffee.com/calcioxi" target="_blank" rel="noopener" style="font-family:var(--serif);font-style:italic;font-size:15px;color:var(--text3);text-decoration:none;opacity:.8;transition:opacity .2s;margin-top:-8px" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">Having fun? ☕️</a>
+</div>
+
+<!-- ══════ DRAFT ══════ -->
+<div id="s-draft" class="screen">
+  <!-- Top bar -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button id="btn-restart" title="Restart game" style="font-family:var(--sans);font-size:18px;background:none;border:none;cursor:pointer;color:var(--text3);padding:4px 6px;line-height:1;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text3)'">←</button>
+      <div class="topbar-title">CALCIO XI</div>
+    </div>
+    <div class="topbar-right">
+      <label class="toggle-wrap" style="font-size:10px;color:var(--text3)"><div class="tog on" id="rat-tog-d"></div>RATINGS</label>
+      <button class="dm-btn" id="dm-tog-draft" title="Toggle dark mode">🌙</button>
+    </div>
+  </div>
+  <!-- Mobile tabs -->
+  <div class="mob-tabs">
+    <div class="mob-tabs-inner">
+      <button class="mob-tab active" data-col="left">⚽ PITCH</button>
+      <button class="mob-tab" data-col="pitch">⚙ SPIN / PICK</button>
+    </div>
+  </div>
+  <div class="draft-main">
+    <!-- LEFT: pitch + overall (wider) -->
+    <div class="left-col mob-active">
+      <svg id="pitch-svg" viewBox="0 0 380 540" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="overall-box" id="overall-box">
+        <div class="ob-title">SQUAD RATING</div>
+        <div class="ob-main">
+          <div class="ob-rating" id="ob-rating">—</div>
+          <div class="ob-bars">
+            <div class="ob-bar-row"><div class="ob-bar-label">ATT</div><div class="ob-bar-track"><div class="ob-bar-fill" id="ob-att" style="width:0%"></div></div><div class="ob-bar-val" id="ob-att-v">—</div></div>
+            <div class="ob-bar-row"><div class="ob-bar-label">MID</div><div class="ob-bar-track"><div class="ob-bar-fill" id="ob-mid" style="width:0%"></div></div><div class="ob-bar-val" id="ob-mid-v">—</div></div>
+            <div class="ob-bar-row"><div class="ob-bar-label">DEF</div><div class="ob-bar-track"><div class="ob-bar-fill" id="ob-def" style="width:0%"></div></div><div class="ob-bar-val" id="ob-def-v">—</div></div>
+            <div class="ob-bar-row"><div class="ob-bar-label">GK</div><div class="ob-bar-track"><div class="ob-bar-fill" id="ob-gk" style="width:0%"></div></div><div class="ob-bar-val" id="ob-gk-v">—</div></div>
+          </div>
+        </div>
+        <div class="ob-count" id="ob-count">0 of 11 players selected</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: action bar at top, then spinner OR player list -->
+    <div class="pitch-col mob-active">
+      <!-- ACTION BAR — always visible at top -->
+      <div class="draft-action-bar">
+        <button class="spin-btn" id="btn-spin">SPIN</button>
+        <button class="lock-btn" id="btn-lock">LOCK IN ✓</button>
+        <button class="respin-btn" id="btn-respin">↻ RE-SPIN</button>
+        <div class="draft-prog-bar" id="draft-prog">0 / 11</div>
+      </div>
+
+      <!-- SPINNER PANEL -->
+      <div class="spinner-panel" id="spinner-panel">
+        <div id="wheel-zone">
+          <div class="spin-zone">
+            <div class="spin-eyebrow">SPIN TO GET A TEAM</div>
+            <div class="slot-machine">
+              <div class="slot-highlight"></div>
+              <div class="slot-track" id="slot-track"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Team revealed after spin lands -->
+        <div class="team-revealed hidden" id="team-revealed">
+          <div class="tr-dot" id="tr-dot"></div>
+          <div>
+            <span class="tr-name" id="tr-name"></span>
+            <span class="tr-season" id="tr-season"></span>
+          </div>
+          <div class="tr-tier" id="tr-tier"></div>
+        </div>
+        <!-- squad-first team list -->
+        <div id="team-zone" style="display:none;flex:1;flex-direction:column;overflow:hidden">
+          <div class="lc-eyebrow">PICK A TEAM &amp; SEASON</div>
+          <select class="era-select" id="era-filter">
+            <option value="">All Seasons (1990–2024)</option>
+            <option value="1990s">1990s</option>
+            <option value="2000s">2000s</option>
+            <option value="2010s">2010s</option>
+            <option value="2020s">2020s</option>
+          </select>
+          <div class="team-scroll" id="team-list"></div>
+        </div>
+      </div>
+
+      <!-- PLAYER PANEL -->
+      <div class="player-panel hidden" id="player-panel">
+        <div class="rc-head">
+          <div class="rc-eyebrow" id="rc-eyebrow">PICK A PLAYER</div>
+          <div class="rc-team-label" id="rc-team-label"></div>
+          <div class="rc-season-label" id="rc-season-label"></div>
+        </div>
+        <div class="player-table" id="player-table"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ SQUAD ══════ -->
+<div id="s-squad" class="screen">
+  <div class="squad-head">
+    <h1>YOUR CALCIO XI</h1>
+    <p id="squad-sub"></p>
+  </div>
+  <div class="squad-body">
+    <div class="squad-pitch"><svg id="squad-svg" viewBox="0 0 380 540" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <div class="squad-right">
+      <div id="squad-overall-box" class="squad-overall-box"></div>
+      <div id="squad-roster"></div>
+    </div>
+  </div>
+  <div class="squad-foot">
+    <button class="sim-btn" id="btn-simulate">SIMULATE THE SEASON →</button>
+    <button class="rst-btn" id="btn-reset-squad">START OVER</button>
+  </div>
+</div>
+
+<!-- ══════ SEASON ══════ -->
+<div id="s-season" class="screen">
+  <div class="sbar">
+    <div class="sbar-title">SERIE A <span id="season-year" style="color:var(--text3);font-size:12px;letter-spacing:2px"></span></div>
+    <div class="sbar-right">
+      <div class="speed-wrap">SPEED<select id="speed-sel"><option value="420">Normal</option><option value="120">Fast</option><option value="16">Ludicrous</option></select></div>
+      <button class="skip-btn" id="btn-skip">SKIP TO END</button>
+    </div>
+  </div>
+  <!-- Mobile sticky sim bar -->
+  <div class="mob-sim-bar" id="mob-sim-bar">
+    <div class="mob-sim-progress">
+      <div class="mob-sim-fill" id="mob-sim-fill"></div>
+    </div>
+    <div class="mob-sim-label" id="mob-sim-label">Matchday 1 of 38</div>
+    <button class="mob-sim-skip" id="btn-skip-mob">SIM REST OF SEASON</button>
+  </div>
+  <!-- Mobile season tabs -->
+  <div class="mob-season-tabs">
+    <button class="mob-season-tab active" data-stab="matches">MATCHES</button>
+    <button class="mob-season-tab" data-stab="table">STANDINGS</button>
+  </div>
+  <div class="season-main" style="position:relative">
+    <div class="matches-col" id="matches-col"></div>
+    <div class="table-col" id="table-col">
+      <div class="table-head">STANDINGS</div>
+      <div class="league-table">
+        <div class="lt-header"><div></div><div>Club</div><div style="text-align:center">W</div><div style="text-align:center">D</div><div style="text-align:center">L</div><div style="text-align:center">Pts</div></div>
+        <div id="lt-body"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ RESULT ══════ -->
+<div id="s-result" class="screen">
+  <div class="res-top">
+    <span class="res-trophy" id="res-trophy">🏆</span>
+    <div class="res-record" id="res-record"></div>
+    <div class="res-tagline" id="res-tagline"></div>
+  </div>
+  <div class="res-stats" id="res-stats"></div>
+  <div class="res-body" id="res-body"></div>
+  <div class="res-msg" id="res-msg"></div>
+  <div class="res-actions">
+    <button class="share-btn" id="btn-share">📤 SHARE RESULT</button>
+    <button class="save-btn" id="btn-save">💾 SAVE IMAGE</button>
+    <button class="play-again" id="btn-again">PLAY AGAIN</button>
+  </div>
+  <a href="https://buymeacoffee.com/calcioxi" target="_blank" rel="noopener" style="font-family:var(--serif);font-style:italic;font-size:15px;color:var(--text3);text-decoration:none;opacity:.8;transition:opacity .2s;animation:up .4s 1s both" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.8">Having fun? ☕️</a>
+  <canvas id="share-canvas"></canvas>
+
+<script>
+// MOBILE TAB LOGIC
+document.querySelectorAll('.mob-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const col = tab.dataset.col;
+    document.querySelectorAll('.mob-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const dm = document.querySelector('.draft-main');
+    ['left-col','pitch-col'].forEach(c => { const el=dm.querySelector('.'+c); if(el) el.classList.remove('mob-active'); });
+    const target = dm.querySelector('.' + col + '-col');
+    if(target) target.classList.add('mob-active');
+  });
+});
+
+document.querySelectorAll('.mob-season-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.mob-season-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const tc = document.getElementById('table-col');
+    if (tab.dataset.stab === 'table') tc.classList.add('mob-visible');
+    else tc.classList.remove('mob-visible');
+  });
+});
+
+// ═══════════════════════════════
+// FORMATIONS
+// ═══════════════════════════════
+const FORMATIONS={
+  '4-3-3':{slots:[
+    {pos:'GK',x:190,y:494},{pos:'RB',x:310,y:410},{pos:'CB',x:242,y:416},{pos:'CB',x:142,y:416},{pos:'LB',x:74,y:410},
+    {pos:'CM',x:264,y:298},{pos:'CM',x:190,y:284},{pos:'CM',x:116,y:298},
+    {pos:'RW',x:304,y:168},{pos:'ST',x:190,y:136},{pos:'LW',x:76,y:168}]},
+  '4-4-2':{slots:[
+    {pos:'GK',x:190,y:494},{pos:'RB',x:310,y:410},{pos:'CB',x:242,y:416},{pos:'CB',x:142,y:416},{pos:'LB',x:74,y:410},
+    {pos:'RM',x:308,y:288},{pos:'CM',x:236,y:282},{pos:'CM',x:148,y:282},{pos:'LM',x:76,y:288},
+    {pos:'ST',x:244,y:150},{pos:'ST',x:136,y:150}]},
+  '3-5-2':{slots:[
+    {pos:'GK',x:190,y:494},{pos:'CB',x:264,y:420},{pos:'CB',x:190,y:416},{pos:'CB',x:116,y:420},
+    {pos:'RWB',x:326,y:298},{pos:'CM',x:254,y:284},{pos:'CM',x:190,y:270},{pos:'CM',x:126,y:284},{pos:'LWB',x:54,y:298},
+    {pos:'ST',x:244,y:150},{pos:'ST',x:136,y:150}]},
+  '4-2-3-1':{slots:[
+    {pos:'GK',x:190,y:494},{pos:'RB',x:310,y:410},{pos:'CB',x:242,y:416},{pos:'CB',x:142,y:416},{pos:'LB',x:74,y:410},
+    {pos:'CDM',x:238,y:318},{pos:'CDM',x:146,y:318},
+    {pos:'RAM',x:292,y:212},{pos:'CAM',x:190,y:202},{pos:'LAM',x:88,y:212},
+    {pos:'ST',x:190,y:114}]},
+  '5-3-2':{slots:[
+    {pos:'GK',x:190,y:494},{pos:'RWB',x:332,y:408},{pos:'CB',x:262,y:420},{pos:'CB',x:190,y:426},{pos:'CB',x:118,y:420},{pos:'LWB',x:48,y:408},
+    {pos:'CM',x:254,y:288},{pos:'CM',x:190,y:274},{pos:'CM',x:126,y:288},
+    {pos:'ST',x:244,y:150},{pos:'ST',x:136,y:150}]},
+  '3-4-3':{slots:[
+    {pos:'GK',x:190,y:494},{pos:'CB',x:264,y:420},{pos:'CB',x:190,y:416},{pos:'CB',x:116,y:420},
+    {pos:'RM',x:308,y:290},{pos:'CM',x:238,y:280},{pos:'CM',x:146,y:280},{pos:'LM',x:76,y:290},
+    {pos:'RW',x:298,y:158},{pos:'ST',x:190,y:138},{pos:'LW',x:82,y:158}]}
+};
+const POS_FULL={GK:'Goalkeeper',RB:'Right Back',LB:'Left Back',CB:'Centre Back',CM:'Central Mid',CDM:'Defensive Mid',CAM:'Attacking Mid',RM:'Right Mid',LM:'Left Mid',RW:'Right Wing',LW:'Left Wing',RWB:'Right Wing-Back',LWB:'Left Wing-Back',RAM:'Right Attacking Mid',LAM:'Left Attacking Mid',ST:'Striker'};
+const ATT_POS=new Set(['ST','RW','LW','RAM','LAM','CAM']);
+const MID_POS=new Set(['CM','CDM','RM','LM']);
+const DEF_POS=new Set(['RB','LB','CB','RWB','LWB']);
+
+// ═══════════════════════════════
+// TEAMS
+// ═══════════════════════════════
+const TEAMS=[
+  // ── ELITE ──────────────────────────────────────────────────
+  {id:'milan0203',name:'AC Milan',season:'2002/03',decade:'2000s',tier:'elite',col:'#ac0000',strength:95,predicted:1,players:[
+    {n:'Dida',pos:'GK',r:84},{n:'Sebastiano Rossi',pos:'GK',r:72},
+    {n:'Cafu',pos:'RB',r:88},{n:'Dario Simic',pos:'RB',r:70},
+    {n:'Alessandro Nesta',pos:'CB',r:90},{n:'Costacurta',pos:'CB',r:80},{n:'Kakha Kaladze',pos:'CB',r:75},
+    {n:'Paolo Maldini',pos:'LB',r:91},{n:'Kakha Kaladze',pos:'LWB',r:75},
+    {n:'Andrea Pirlo',pos:'CDM',r:86},{n:'Gennaro Gattuso',pos:'CDM',r:81},
+    {n:'Demetrio Albertini',pos:'CM',r:80},{n:'Clarence Seedorf',pos:'CM',r:84},
+    {n:'Rui Costa',pos:'CAM',r:84},{n:'Rivaldo',pos:'LW',r:84},
+    {n:'Serginho',pos:'LW',r:77},{n:'Andriy Shevchenko',pos:'ST',r:89},
+    {n:'Jon Dahl Tomasson',pos:'ST',r:74},{n:'Filippo Inzaghi',pos:'ST',r:83}
+  ]},
+  {id:'inter0910',name:'Inter Milan',season:'2009/10',decade:'2010s',tier:'elite',col:'#0033a0',strength:93,predicted:1,players:[
+    {n:'Júlio César',pos:'GK',r:85},{n:'Luca Castellazzi',pos:'GK',r:69},
+    {n:'Maicon',pos:'RB',r:86},{n:'Davide Santon',pos:'RB',r:68},
+    {n:'Lúcio',pos:'CB',r:84},{n:'Walter Samuel',pos:'CB',r:80},{n:'Marco Materazzi',pos:'CB',r:74},
+    {n:'Cristian Chivu',pos:'LB',r:76},{n:'Marco Andreolli',pos:'LWB',r:65},
+    {n:'Esteban Cambiasso',pos:'CDM',r:84},{n:'Thiago Motta',pos:'CDM',r:76},
+    {n:'Dejan Stanković',pos:'CM',r:80},{n:'Wesley Sneijder',pos:'CM',r:89},
+    {n:'Wesley Sneijder',pos:'CAM',r:89},{n:'Goran Pandev',pos:'LAM',r:73},
+    {n:'Maicon',pos:'RAM',r:86},{n:'Wesley Sneijder',pos:'RAM',r:89},
+    {n:'Maicon',pos:'RWB',r:86},{n:'Sulley Muntari',pos:'LW',r:73},
+    {n:'Samuel Eto\'o',pos:'ST',r:86},{n:'Diego Milito',pos:'ST',r:84},{n:'Goran Pandev',pos:'ST',r:73}
+  ]},
+  {id:'naples2223',name:'Napoli',season:'2022/23',decade:'2020s',tier:'elite',col:'#087dc2',strength:93,predicted:1,players:[
+    {n:'Alex Meret',pos:'GK',r:78},{n:'Hubert Idasiak',pos:'GK',r:59},
+    {n:'Giovanni Di Lorenzo',pos:'RB',r:80},{n:'Matteo Politano',pos:'RW',r:74},
+    {n:'Amir Rrahmani',pos:'CB',r:78},{n:'Kim Min-jae',pos:'CB',r:84},{n:'Juan Jesus',pos:'CB',r:71},
+    {n:'Mario Rui',pos:'LB',r:72},{n:'Mathías Olivera',pos:'LWB',r:71},
+    {n:'Stanislav Lobotka',pos:'CDM',r:82},{n:'André-Frank Anguissa',pos:'CDM',r:81},
+    {n:'Piotr Zieliński',pos:'CM',r:82},{n:'Hirving Lozano',pos:'CM',r:74},
+    {n:'Khvicha Kvaratskhelia',pos:'LW',r:86},{n:'Piotr Zieliński',pos:'CAM',r:82},
+    {n:'Matteo Politano',pos:'RW',r:74},{n:'Elif Elmas',pos:'RAM',r:71},
+    {n:'Victor Osimhen',pos:'ST',r:87},{n:'Giacomo Raspadori',pos:'ST',r:76},{n:'Giovanni Simeone',pos:'ST',r:74}
+  ]},
+  {id:'juve1112',name:'Juventus',season:'2011/12',decade:'2010s',tier:'elite',col:'#1a1a1a',strength:89,predicted:1,players:[
+    {n:'Gianluigi Buffon',pos:'GK',r:91},{n:'Marco Storari',pos:'GK',r:71},
+    {n:'Stephan Lichtsteiner',pos:'RB',r:80},{n:'Martín Cáceres',pos:'RB',r:71},
+    {n:'Leonardo Bonucci',pos:'CB',r:84},{n:'Giorgio Chiellini',pos:'CB',r:86},{n:'Andrea Barzagli',pos:'CB',r:82},
+    {n:'Paolo De Ceglie',pos:'LB',r:69},{n:'Fabio Grosso',pos:'LWB',r:71},
+    {n:'Andrea Pirlo',pos:'CDM',r:90},{n:'Arturo Vidal',pos:'CDM',r:84},
+    {n:'Claudio Marchisio',pos:'CM',r:81},{n:'Mirko Vucinic',pos:'CM',r:78},
+    {n:'Alessandro Del Piero',pos:'CAM',r:78},{n:'Miloš Krasić',pos:'RAM',r:73},
+    {n:'Simone Pepe',pos:'RW',r:71},{n:'Miloš Krasić',pos:'LW',r:73},
+    {n:'Alessandro Matri',pos:'ST',r:76},{n:'Mirko Vucinic',pos:'ST',r:78},{n:'Marco Borriello',pos:'ST',r:73}
+  ]},
+  {id:'roma0001',name:'AS Roma',season:'2000/01',decade:'2000s',tier:'elite',col:'#8b1a1a',strength:87,predicted:1,players:[
+    {n:'Francesco Antonioli',pos:'GK',r:78},{n:'Ivan Pelizzoli',pos:'GK',r:66},
+    {n:'Christian Panucci',pos:'RB',r:77},{n:'Aldair',pos:'RB',r:78},
+    {n:'Walter Samuel',pos:'CB',r:83},{n:'Jonathan Zebina',pos:'CB',r:71},{n:'Aldair',pos:'CB',r:78},
+    {n:'Cafu',pos:'LB',r:87},{n:'Jonathan Zebina',pos:'LWB',r:70},
+    {n:'Emerson',pos:'CDM',r:80},{n:'Damiano Tommasi',pos:'CDM',r:78},
+    {n:'Marcos Assunção',pos:'CM',r:72},{n:'Hidetoshi Nakata',pos:'CM',r:80},
+    {n:'Francesco Totti',pos:'CAM',r:89},{n:'Hidetoshi Nakata',pos:'RAM',r:80},
+    {n:'Vincenzo Montella',pos:'LW',r:78},{n:'Marco Delvecchio',pos:'RW',r:72},
+    {n:'Gabriel Batistuta',pos:'ST',r:88},{n:'Vincenzo Montella',pos:'ST',r:78},{n:'Marco Delvecchio',pos:'ST',r:73}
+  ]},
+  // ── STRONG ─────────────────────────────────────────────────
+  {id:'naples1213',name:'Napoli',season:'2012/13',decade:'2010s',tier:'good',col:'#087dc2',strength:83,predicted:2,players:[
+    {n:'Morgan De Sanctis',pos:'GK',r:78},{n:'Rafael',pos:'GK',r:67},
+    {n:'Christian Maggio',pos:'RB',r:76},{n:'Camillo Zuniga',pos:'RB',r:71},
+    {n:'Raúl Albiol',pos:'CB',r:80},{n:'Salvatore Aronica',pos:'CB',r:69},{n:'Camillo Zuniga',pos:'CB',r:71},
+    {n:'Giandomenico Mesto',pos:'LB',r:67},{n:'Camillo Zuniga',pos:'LWB',r:71},
+    {n:'Gökhan Inler',pos:'CDM',r:78},{n:'Walter Gargano',pos:'CDM',r:73},
+    {n:'Marek Hamšík',pos:'CM',r:84},{n:'Blerim Džemaili',pos:'CM',r:71},
+    {n:'Marek Hamšík',pos:'CAM',r:84},{n:'Lorenzo Insigne',pos:'LAM',r:78},
+    {n:'Lorenzo Insigne',pos:'LW',r:78},{n:'Christian Maggio',pos:'RW',r:74},
+    {n:'Edinson Cavani',pos:'ST',r:88},{n:'Goran Pandev',pos:'ST',r:71},{n:'Lorenzo Insigne',pos:'ST',r:76}
+  ]},
+  {id:'fior1213',name:'Fiorentina',season:'2012/13',decade:'2010s',tier:'good',col:'#7b2d8b',strength:73,predicted:4,players:[
+    {n:'Emiliano Viviano',pos:'GK',r:76},{n:'Neto',pos:'GK',r:71},
+    {n:'Davide Astori',pos:'RB',r:74},{n:'Nenad Tomovic',pos:'RB',r:69},
+    {n:'Gonzalo Rodriguez',pos:'CB',r:74},{n:'Stefan Savić',pos:'CB',r:72},{n:'Manuel Pasqual',pos:'CB',r:67},
+    {n:'Manuel Pasqual',pos:'LB',r:68},{n:'Marcos Alonso',pos:'LWB',r:69},
+    {n:'David Pizarro',pos:'CDM',r:76},{n:'Alberto Aquilani',pos:'CDM',r:73},
+    {n:'Borja Valero',pos:'CM',r:78},{n:'Alberto Aquilani',pos:'CM',r:73},
+    {n:'Juan Cuadrado',pos:'CAM',r:78},{n:'Borja Valero',pos:'CAM',r:78},
+    {n:'Juan Cuadrado',pos:'RW',r:78},{n:'Adem Ljajić',pos:'LW',r:72},
+    {n:'Giuseppe Rossi',pos:'ST',r:80},{n:'Stevan Jovetić',pos:'ST',r:78},{n:'Adem Ljajić',pos:'ST',r:72}
+  ]},
+  {id:'atalanta1819',name:'Atalanta',season:'2018/19',decade:'2010s',tier:'good',col:'#1e5fba',strength:77,predicted:3,players:[
+    {n:'Pierluigi Gollini',pos:'GK',r:74},{n:'Marco Sportiello',pos:'GK',r:69},
+    {n:'Hans Hateboer',pos:'RB',r:72},{n:'Timothy Castagne',pos:'RB',r:71},
+    {n:'Rafael Tolói',pos:'CB',r:74},{n:'José Luis Palomino',pos:'CB',r:72},{n:'Andrea Masiello',pos:'CB',r:69},
+    {n:'Robin Gosens',pos:'LB',r:74},{n:'Alejandro Gómez',pos:'LWB',r:78},
+    {n:'Marten de Roon',pos:'CDM',r:76},{n:'Remo Freuler',pos:'CDM',r:74},
+    {n:'Papu Gómez',pos:'CM',r:80},{n:'Alejandro Gómez',pos:'CM',r:80},
+    {n:'Papu Gómez',pos:'CAM',r:80},{n:'Duvan Zapata',pos:'LAM',r:82},
+    {n:'Hans Hateboer',pos:'RW',r:72},{n:'Robin Gosens',pos:'LW',r:74},
+    {n:'Duvan Zapata',pos:'ST',r:82},{n:'Josip Iličić',pos:'ST',r:78},{n:'Andrea Petagna',pos:'ST',r:69}
+  ]},
+  {id:'lazio9900',name:'SS Lazio',season:'1999/00',decade:'2000s',tier:'good',col:'#4a9fd4',strength:85,predicted:2,players:[
+    {n:'Luca Marchegiani',pos:'GK',r:78},{n:'Angelo Peruzzi',pos:'GK',r:80},
+    {n:'Diego Fuser',pos:'RB',r:73},{n:'Matías Almeyda',pos:'RB',r:69},
+    {n:'Sinisa Mihajlovic',pos:'CB',r:80},{n:'Alessandro Nesta',pos:'CB',r:89},{n:'Matías Almeyda',pos:'CB',r:72},
+    {n:'Sinisa Mihajlovic',pos:'LB',r:78},{n:'Sérgio Conceiçao',pos:'LWB',r:77},
+    {n:'Matías Almeyda',pos:'CDM',r:73},{n:'Dejan Stanković',pos:'CDM',r:80},
+    {n:'Sérgio Conceiçao',pos:'CM',r:78},{n:'Juan Sebastián Verón',pos:'CM',r:86},
+    {n:'Pavel Nedvěd',pos:'CAM',r:84},{n:'Juan Sebastián Verón',pos:'LAM',r:86},
+    {n:'Pavel Nedvěd',pos:'RW',r:84},{n:'Marcelo Salas',pos:'LW',r:78},
+    {n:'Hernán Crespo',pos:'ST',r:86},{n:'Marcelo Salas',pos:'ST',r:78},{n:'Beppe Signori',pos:'ST',r:75}
+  ]},
+  {id:'parma0102',name:'Parma',season:'2001/02',decade:'2000s',tier:'good',col:'#c8a000',strength:71,predicted:5,players:[
+    {n:'Gianluigi Buffon',pos:'GK',r:83},{n:'Matteo Sereni',pos:'GK',r:67},
+    {n:'Alain Boghossian',pos:'RB',r:69},{n:'Daniele Bonera',pos:'RB',r:67},
+    {n:'Fabio Cannavaro',pos:'CB',r:84},{n:'Lilian Thuram',pos:'CB',r:82},{n:'Daniele Bonera',pos:'CB',r:69},
+    {n:'Lilian Thuram',pos:'LB',r:80},{n:'Massimo Bizzarri',pos:'LWB',r:65},
+    {n:'Dino Baggio',pos:'CDM',r:76},{n:'Mauro Sensini',pos:'CDM',r:71},
+    {n:'Hidetoshi Nakata',pos:'CM',r:78},{n:'Juan Sebastián Verón',pos:'CM',r:83},
+    {n:'Hidetoshi Nakata',pos:'CAM',r:78},{n:'Enrico Chiesa',pos:'RAM',r:73},
+    {n:'Enrico Chiesa',pos:'RW',r:73},{n:'Adriano',pos:'LW',r:78},
+    {n:'Adriano',pos:'ST',r:78},{n:'Enrico Chiesa',pos:'ST',r:73},{n:'Marco Marchionni',pos:'ST',r:65}
+  ]},
+  {id:'inter2122',name:'Inter Milan',season:'2021/22',decade:'2020s',tier:'good',col:'#0033a0',strength:89,predicted:1,players:[
+    {n:'Samir Handanović',pos:'GK',r:78},{n:'Ionut Radu',pos:'GK',r:63},
+    {n:'Denzel Dumfries',pos:'RB',r:78},{n:'Matteo Darmian',pos:'RB',r:71},
+    {n:'Milan Škriniar',pos:'CB',r:84},{n:'Stefan de Vrij',pos:'CB',r:82},{n:'Alessandro Bastoni',pos:'CB',r:82},
+    {n:'Ivan Perišić',pos:'LB',r:81},{n:'Federico Dimarco',pos:'LWB',r:76},
+    {n:'Marcelo Brozović',pos:'CDM',r:84},{n:'Arturo Vidal',pos:'CDM',r:71},
+    {n:'Nicolò Barella',pos:'CM',r:84},{n:'Hakan Çalhanoğlu',pos:'CM',r:81},
+    {n:'Hakan Çalhanoğlu',pos:'CAM',r:81},{n:'Alexis Sánchez',pos:'LAM',r:73},
+    {n:'Denzel Dumfries',pos:'RWB',r:78},{n:'Ivan Perišić',pos:'LW',r:81},
+    {n:'Lautaro Martínez',pos:'ST',r:84},{n:'Edin Džeko',pos:'ST',r:78},{n:'Alexis Sánchez',pos:'ST',r:73}
+  ]},
+  {id:'roma2122',name:'AS Roma',season:'2021/22',decade:'2020s',tier:'good',col:'#8b1a1a',strength:75,predicted:5,players:[
+    {n:'Rui Patrício',pos:'GK',r:78},{n:'Daniel Fuzato',pos:'GK',r:63},
+    {n:'Rick Karsdorp',pos:'RB',r:74},{n:'Davide Santon',pos:'RB',r:63},
+    {n:'Gianluca Mancini',pos:'CB',r:76},{n:'Chris Smalling',pos:'CB',r:76},{n:'Roger Ibáñez',pos:'CB',r:74},
+    {n:'Leonardo Spinazzola',pos:'LB',r:78},{n:'Matías Viña',pos:'LWB',r:67},
+    {n:'Bryan Cristante',pos:'CDM',r:74},{n:'Gonzalo Villar',pos:'CDM',r:67},
+    {n:'Lorenzo Pellegrini',pos:'CM',r:80},{n:'Jordan Veretout',pos:'CM',r:76},
+    {n:'Nicolò Zaniolo',pos:'CAM',r:78},{n:'Lorenzo Pellegrini',pos:'CAM',r:80},
+    {n:'Nicolò Zaniolo',pos:'RW',r:78},{n:'Nicola Zalewski',pos:'LW',r:67},
+    {n:'Tammy Abraham',pos:'ST',r:78},{n:'Eldor Shomurodov',pos:'ST',r:69},{n:'Borja Mayoral',pos:'ST',r:67}
+  ]},
+  // ── MID TABLE ──────────────────────────────────────────────
+  {id:'torino1718',name:'Torino',season:'2017/18',decade:'2010s',tier:'mid',col:'#8b1a1a',strength:62,predicted:9,players:[
+    {n:'Salvatore Sirigu',pos:'GK',r:76},{n:'Joe Hart',pos:'GK',r:69},
+    {n:'Lorenzo De Silvestri',pos:'RB',r:69},{n:'Emiliano Moretti',pos:'RB',r:67},
+    {n:'Nicolas N\'Koulou',pos:'CB',r:74},{n:'Kevin Bonifazi',pos:'CB',r:67},{n:'Emiliano Moretti',pos:'CB',r:67},
+    {n:'Cristian Ansaldi',pos:'LB',r:69},{n:'Davide Zappacosta',pos:'LWB',r:69},
+    {n:'Tomas Rincon',pos:'CDM',r:72},{n:'Daniele Baselli',pos:'CDM',r:71},
+    {n:'Daniele Baselli',pos:'CM',r:72},{n:'Adem Ljajić',pos:'CM',r:72},
+    {n:'Daniele Baselli',pos:'CAM',r:72},{n:'Adem Ljajić',pos:'CAM',r:72},
+    {n:'Lorenzo De Silvestri',pos:'RW',r:69},{n:'Adem Ljajić',pos:'LW',r:72},
+    {n:'Andrea Belotti',pos:'ST',r:82},{n:'M\'Baye Niang',pos:'ST',r:69},{n:'Maxi Lopez',pos:'ST',r:63}
+  ]},
+  {id:'udinese0607',name:'Udinese',season:'2006/07',decade:'2000s',tier:'mid',col:'#1a1a1a',strength:63,predicted:8,players:[
+    {n:'Morgan De Sanctis',pos:'GK',r:78},{n:'Albano Bizzarri',pos:'GK',r:67},
+    {n:'Cristian Zapata',pos:'RB',r:72},{n:'Aleksandar Lukovic',pos:'RB',r:67},
+    {n:'Abdoulaye Méïté',pos:'CB',r:69},{n:'Andrea Coda',pos:'CB',r:67},{n:'Aleksandar Lukovic',pos:'CB',r:67},
+    {n:'Gaetano Maini',pos:'LB',r:65},{n:'Cristian Zapata',pos:'LWB',r:70},
+    {n:'Massimo Battara',pos:'CDM',r:67},{n:'Floro Flores',pos:'CDM',r:69},
+    {n:'Simone Perrotta',pos:'CM',r:72},{n:'Floro Flores',pos:'CM',r:69},
+    {n:'Vincenzo Iaquinta',pos:'CAM',r:74},{n:'Antonio Floro Flores',pos:'RAM',r:69},
+    {n:'Vincenzo Iaquinta',pos:'RW',r:74},{n:'Mauro Zárate',pos:'LW',r:72},
+    {n:'Vincenzo Iaquinta',pos:'ST',r:76},{n:'Antonio Floro Flores',pos:'ST',r:71},{n:'Mauro Zárate',pos:'ST',r:72}
+  ]},
+  {id:'monza2324',name:'Monza',season:'2023/24',decade:'2020s',tier:'mid',col:'#cc0000',strength:60,predicted:11,players:[
+    {n:'Michele Di Gregorio',pos:'GK',r:74},{n:'Alessandro Sorrentino',pos:'GK',r:61},
+    {n:'Samuele Birindelli',pos:'RB',r:65},{n:'Armando Izzo',pos:'RB',r:67},
+    {n:'Pablo Marí',pos:'CB',r:72},{n:'Luca Caldirola',pos:'CB',r:67},{n:'Andrea Carboni',pos:'CB',r:65},
+    {n:'Carlos Augusto',pos:'LB',r:74},{n:'Gianluca Caprari',pos:'LWB',r:71},
+    {n:'Matteo Pessina',pos:'CDM',r:76},{n:'Nicolás González',pos:'CDM',r:69},
+    {n:'Gianluca Caprari',pos:'CM',r:72},{n:'Matteo Pessina',pos:'CM',r:76},
+    {n:'Gianluca Caprari',pos:'CAM',r:72},{n:'Dany Mota',pos:'RAM',r:69},
+    {n:'Gianluca Caprari',pos:'RW',r:72},{n:'Dany Mota',pos:'LW',r:69},
+    {n:'Gianluca Petagna',pos:'ST',r:67},{n:'Dany Mota',pos:'ST',r:69},{n:'Lorenzo Colombo',pos:'ST',r:65}
+  ]},
+  {id:'sampdoria0102',name:'Sampdoria',season:'2001/02',decade:'2000s',tier:'mid',col:'#1a4a8f',strength:61,predicted:9,players:[
+    {n:'Fabrizio Ferron',pos:'GK',r:71},{n:'Francesco Antonioli',pos:'GK',r:74},
+    {n:'Angelo Castellini',pos:'RB',r:66},{n:'Cristian Zenoni',pos:'RB',r:69},
+    {n:'Pietro Accardi',pos:'CB',r:67},{n:'Emiliano Bonazzoli',pos:'CB',r:65},{n:'Mirko Conte',pos:'CB',r:64},
+    {n:'Cristian Zenoni',pos:'LB',r:69},{n:'Angelo Castellini',pos:'LWB',r:65},
+    {n:'Angelo Di Livio',pos:'CDM',r:73},{n:'Tomáš Galásek',pos:'CDM',r:71},
+    {n:'Marcelo Otero',pos:'CM',r:68},{n:'Angelo Di Livio',pos:'CM',r:73},
+    {n:'Juan Pablo Sorín',pos:'CAM',r:72},{n:'Vincenzo Montella',pos:'RAM',r:76},
+    {n:'Emiliano Bonazzoli',pos:'RW',r:65},{n:'Juan Pablo Sorín',pos:'LW',r:72},
+    {n:'Vincenzo Montella',pos:'ST',r:76},{n:'Fabio Bazzani',pos:'ST',r:68},{n:'Emiliano Bonazzoli',pos:'ST',r:65}
+  ]},
+  {id:'bologna1920',name:'Bologna',season:'2019/20',decade:'2020s',tier:'mid',col:'#cc3300',strength:59,predicted:12,players:[
+    {n:'Lukasz Skorupski',pos:'GK',r:75},{n:'Angelo Da Costa',pos:'GK',r:67},
+    {n:'Takehiro Tomiyasu',pos:'RB',r:74},{n:'Ibrahima Mbaye',pos:'RB',r:68},
+    {n:'Danilo Larangeira',pos:'CB',r:71},{n:'Takehiro Tomiyasu',pos:'CB',r:74},{n:'Gary Medel',pos:'CB',r:74},
+    {n:'Mitchell Dijks',pos:'LB',r:68},{n:'Riccardo Orsolini',pos:'LWB',r:72},
+    {n:'Gary Medel',pos:'CDM',r:74},{n:'Mattias Svanberg',pos:'CDM',r:69},
+    {n:'Roberto Soriano',pos:'CM',r:76},{n:'Mattias Svanberg',pos:'CM',r:69},
+    {n:'Roberto Soriano',pos:'CAM',r:76},{n:'Riccardo Orsolini',pos:'RAM',r:72},
+    {n:'Riccardo Orsolini',pos:'RW',r:72},{n:'Federico Santander',pos:'LW',r:66},
+    {n:'Rodrigo Palacio',pos:'ST',r:74},{n:'Federico Santander',pos:'ST',r:66},{n:'Musa Barrow',pos:'ST',r:71}
+  ]},
+  {id:'sassuolo1516',name:'Sassuolo',season:'2015/16',decade:'2010s',tier:'mid',col:'#00632b',strength:63,predicted:7,players:[
+    {n:'Andrea Consigli',pos:'GK',r:76},{n:'Gianluca Pegolo',pos:'GK',r:69},
+    {n:'Paolo Cannavaro',pos:'RB',r:68},{n:'Matteo Politano',pos:'RB',r:72},
+    {n:'Francesco Acerbi',pos:'CB',r:76},{n:'Paolo Cannavaro',pos:'CB',r:68},{n:'Alex Ferrari',pos:'CB',r:66},
+    {n:'Luca Peluso',pos:'LB',r:65},{n:'Pol Lirola',pos:'LWB',r:68},
+    {n:'Alfred Duncan',pos:'CDM',r:74},{n:'Simone Missiroli',pos:'CDM',r:70},
+    {n:'Domenico Berardi',pos:'CM',r:78},{n:'Alfred Duncan',pos:'CM',r:74},
+    {n:'Domenico Berardi',pos:'CAM',r:78},{n:'Antonio Floro Flores',pos:'RAM',r:66},
+    {n:'Domenico Berardi',pos:'RW',r:78},{n:'Sime Vrsaljko',pos:'RW',r:72},
+    {n:'Gregoire Defrel',pos:'ST',r:74},{n:'Simone Zaza',pos:'ST',r:74},{n:'Antonio Floro Flores',pos:'ST',r:66}
+  ]},
+  {id:'lazio2324',name:'SS Lazio',season:'2023/24',decade:'2020s',tier:'mid',col:'#4a9fd4',strength:71,predicted:5,players:[
+    {n:'Ivan Provedel',pos:'GK',r:76},{n:'Christos Mandas',pos:'GK',r:65},
+    {n:'Adam Marusic',pos:'RB',r:72},{n:'Elseid Hysaj',pos:'RB',r:67},
+    {n:'Nicolò Casale',pos:'CB',r:72},{n:'Alessio Romagnoli',pos:'CB',r:74},{n:'Patric',pos:'CB',r:67},
+    {n:'Luca Pellegrini',pos:'LB',r:67},{n:'Marcos Antonio',pos:'LWB',r:65},
+    {n:'Nicolò Rovella',pos:'CDM',r:74},{n:'Marcos Antonio',pos:'CDM',r:65},
+    {n:'Luis Alberto',pos:'CM',r:80},{n:'Daichi Kamada',pos:'CM',r:73},
+    {n:'Felipe Anderson',pos:'CAM',r:78},{n:'Luis Alberto',pos:'CAM',r:80},
+    {n:'Felipe Anderson',pos:'RW',r:78},{n:'Mattia Zaccagni',pos:'LW',r:76},
+    {n:'Ciro Immobile',pos:'ST',r:82},{n:'Pedro',pos:'ST',r:74},{n:'Castellanos',pos:'ST',r:67}
+  ]},
+  {id:'verona2122',name:'Hellas Verona',season:'2021/22',decade:'2020s',tier:'mid',col:'#1a3a8f',strength:58,predicted:10,players:[
+    {n:'Lorenzo Montipò',pos:'GK',r:72},{n:'Ivor Pandur',pos:'GK',r:62},
+    {n:'Davide Faraoni',pos:'RB',r:70},{n:'Nicola Casale',pos:'RB',r:68},
+    {n:'Koray Günter',pos:'CB',r:68},{n:'Nicola Casale',pos:'CB',r:68},{n:'Federico Ceccherini',pos:'CB',r:66},
+    {n:'Darko Lazović',pos:'LB',r:70},{n:'Giangiacomo Magnani',pos:'LWB',r:64},
+    {n:'Miguel Veloso',pos:'CDM',r:72},{n:'Ivan Ilić',pos:'CDM',r:70},
+    {n:'Antonin Barak',pos:'CM',r:74},{n:'Ivan Ilić',pos:'CM',r:70},
+    {n:'Antonin Barak',pos:'CAM',r:74},{n:'Darko Lazović',pos:'RAM',r:70},
+    {n:'Darko Lazović',pos:'RW',r:70},{n:'Adrien Tameze',pos:'LW',r:66},
+    {n:'Giovanni Simeone',pos:'ST',r:76},{n:'Kevin Lasagna',pos:'ST',r:68},{n:'Nikola Kalinic',pos:'ST',r:67}
+  ]},
+  // ── LOWER HALF ─────────────────────────────────────────────
+  {id:'siena0405',name:'Siena',season:'2004/05',decade:'2000s',tier:'lower',col:'#006400',strength:51,predicted:15,players:[
+    {n:'Luca Bucci',pos:'GK',r:69},{n:'Albano Bizzarri',pos:'GK',r:63},
+    {n:'Daniele Adani',pos:'RB',r:67},{n:'Stefano Fiore',pos:'RB',r:65},
+    {n:'Francesco Colonnese',pos:'CB',r:65},{n:'Daniele Adani',pos:'CB',r:67},{n:'Pietro De Giorgio',pos:'CB',r:63},
+    {n:'Filippo Cristante',pos:'LB',r:63},{n:'Marco Rossi',pos:'LWB',r:61},
+    {n:'Riccardo Maspero',pos:'CDM',r:67},{n:'Alessandro Rossi',pos:'CDM',r:63},
+    {n:'Stefano Fiore',pos:'CM',r:72},{n:'Riccardo Maspero',pos:'CM',r:67},
+    {n:'Mirko Vucinic',pos:'CAM',r:74},{n:'Stefano Fiore',pos:'CAM',r:72},
+    {n:'Mirko Vucinic',pos:'RW',r:74},{n:'Stefano Fiore',pos:'LW',r:71},
+    {n:'Mirko Vucinic',pos:'ST',r:76},{n:'David Di Michele',pos:'ST',r:67},{n:'Bernardo Corradi',pos:'ST',r:65}
+  ]},
+  {id:'cagliari1516',name:'Cagliari',season:'2015/16',decade:'2010s',tier:'lower',col:'#cc0000',strength:52,predicted:14,players:[
+    {n:'Marco Storari',pos:'GK',r:69},{n:'Thomas Strakosha',pos:'GK',r:65},
+    {n:'Fabrizio Cacciatore',pos:'RB',r:63},{n:'Danilo Avelar',pos:'RB',r:63},
+    {n:'Matías Silvestre',pos:'CB',r:65},{n:'Bruno Alves',pos:'CB',r:69},{n:'Fabrizio Cacciatore',pos:'CB',r:63},
+    {n:'Danilo Avelar',pos:'LB',r:63},{n:'Albin Ekdal',pos:'LWB',r:67},
+    {n:'Radja Nainggolan',pos:'CDM',r:82},{n:'Albin Ekdal',pos:'CDM',r:67},
+    {n:'Radja Nainggolan',pos:'CM',r:82},{n:'Mauricio Pinilla',pos:'CM',r:67},
+    {n:'Radja Nainggolan',pos:'CAM',r:82},{n:'Diego Farias',pos:'RAM',r:67},
+    {n:'Diego Farias',pos:'RW',r:67},{n:'Marco Sau',pos:'LW',r:69},
+    {n:'Marco Sau',pos:'ST',r:69},{n:'Mauricio Pinilla',pos:'ST',r:67},{n:'Diego Farias',pos:'ST',r:67}
+  ]},
+  {id:'salernitana2223',name:'Salernitana',season:'2022/23',decade:'2020s',tier:'lower',col:'#8b4513',strength:48,predicted:17,players:[
+    {n:'Luigi Sepe',pos:'GK',r:69},{n:'Vincenzo Fiorillo',pos:'GK',r:63},
+    {n:'Candreva',pos:'RB',r:69},{n:'Mazzocchi',pos:'RB',r:63},
+    {n:'Bronn',pos:'CB',r:63},{n:'Gyomber',pos:'CB',r:65},{n:'Daniliuc',pos:'CB',r:63},
+    {n:'Bradaric',pos:'LB',r:63},{n:'Nicola Bonetti',pos:'LWB',r:59},
+    {n:'Lassana Coulibaly',pos:'CDM',r:65},{n:'Radovanovic',pos:'CDM',r:63},
+    {n:'Maggiore',pos:'CM',r:63},{n:'Lassana Coulibaly',pos:'CM',r:65},
+    {n:'Boulaye Dia',pos:'CAM',r:74},{n:'Candreva',pos:'RAM',r:69},
+    {n:'Candreva',pos:'RW',r:69},{n:'Nicola Bonetti',pos:'LW',r:59},
+    {n:'Boulaye Dia',pos:'ST',r:74},{n:'Botheim',pos:'ST',r:63},{n:'Piatek',pos:'ST',r:67}
+  ]},
+  {id:'lecce2223',name:'Lecce',season:'2022/23',decade:'2020s',tier:'lower',col:'#cc6600',strength:50,predicted:16,players:[
+    {n:'Wladimiro Falcone',pos:'GK',r:70},{n:'Marco Bleve',pos:'GK',r:60},
+    {n:'Valentin Gendrey',pos:'RB',r:64},{n:'Federico Baschirotto',pos:'RB',r:66},
+    {n:'Federico Baschirotto',pos:'CB',r:66},{n:'Marin Pongračić',pos:'CB',r:68},{n:'Antonino Gallo',pos:'CB',r:62},
+    {n:'Antonino Gallo',pos:'LB',r:62},{n:'Valentin Gendrey',pos:'LWB',r:63},
+    {n:'Kristjan Asllani',pos:'CDM',r:68},{n:'Askildsen',pos:'CDM',r:62},
+    {n:'Rémi Oudin',pos:'CM',r:66},{n:'Kristjan Asllani',pos:'CM',r:68},
+    {n:'Strefezza',pos:'CAM',r:70},{n:'Rémi Oudin',pos:'RAM',r:66},
+    {n:'Strefezza',pos:'RW',r:70},{n:'Lameck Banda',pos:'LW',r:64},
+    {n:'Lorenzo Colombo',pos:'ST',r:68},{n:'Assan Ceesay',pos:'ST',r:64},{n:'Antonino Gallo',pos:'ST',r:60}
+  ]},
+  {id:'brescia0001',name:'Brescia',season:'2000/01',decade:'2000s',tier:'lower',col:'#003d8f',strength:55,predicted:13,players:[
+    {n:'Luca Castellazzi',pos:'GK',r:70},{n:'Augusto Inácio',pos:'GK',r:61},
+    {n:'Mauro Bressan',pos:'RB',r:67},{n:'Matteo Brighi',pos:'RB',r:65},
+    {n:'Dario Simic',pos:'CB',r:69},{n:'Luca Castellini',pos:'CB',r:63},{n:'Francesco Coco',pos:'CB',r:67},
+    {n:'Francesco Coco',pos:'LB',r:67},{n:'Andrea Caracciolo',pos:'LWB',r:62},
+    {n:'Demetrio Albertini',pos:'CDM',r:78},{n:'Matteo Brighi',pos:'CDM',r:65},
+    {n:'Mauro Bressan',pos:'CM',r:67},{n:'Demetrio Albertini',pos:'CM',r:78},
+    {n:'Roberto Baggio',pos:'CAM',r:82},{n:'Mauro Bressan',pos:'RAM',r:67},
+    {n:'Mauro Bressan',pos:'RW',r:67},{n:'Andrea Caracciolo',pos:'LW',r:62},
+    {n:'Roberto Baggio',pos:'ST',r:82},{n:'Andrea Caracciolo',pos:'ST',r:62},{n:'Zé Maria',pos:'ST',r:60}
+  ]},
+  {id:'pescara1213',name:'Pescara',season:'2012/13',decade:'2010s',tier:'lower',col:'#ff6600',strength:46,predicted:19,players:[
+    {n:'Albano Bizzarri',pos:'GK',r:67},{n:'Gabriel',pos:'GK',r:58},
+    {n:'Massimo Lombardo',pos:'RB',r:62},{n:'Zdeněk Grygera',pos:'RB',r:63},
+    {n:'Zdeněk Grygera',pos:'CB',r:63},{n:'Salvatore Aronica',pos:'CB',r:67},{n:'Massimo Lombardo',pos:'CB',r:62},
+    {n:'Ciro Immobile',pos:'LB',r:64},{n:'Lorenzo Crisetig',pos:'LWB',r:60},
+    {n:'Gennaro Tutino',pos:'CDM',r:61},{n:'Lorenzo Crisetig',pos:'CDM',r:60},
+    {n:'Marco Verratti',pos:'CM',r:76},{n:'Gennaro Tutino',pos:'CM',r:61},
+    {n:'Marco Verratti',pos:'CAM',r:76},{n:'Lorenzo Insigne',pos:'RAM',r:74},
+    {n:'Lorenzo Insigne',pos:'RW',r:74},{n:'Massimo Maccarone',pos:'LW',r:65},
+    {n:'Ciro Immobile',pos:'ST',r:72},{n:'Massimo Maccarone',pos:'ST',r:65},{n:'Gennaro Tutino',pos:'ST',r:61}
+  ]},
+  {id:'frosinone1516',name:'Frosinone',season:'2015/16',decade:'2010s',tier:'lower',col:'#ffcc00',strength:45,predicted:20,players:[
+    {n:'Marco Sportiello',pos:'GK',r:69},
+    {n:'Reto Ziegler',pos:'RB',r:65},{n:'Andrea Brighenti',pos:'RB',r:60},
+    {n:'Aleandro Rosi',pos:'CB',r:63},{n:'Leonardo Blanchard',pos:'CB',r:60},{n:'Reto Ziegler',pos:'CB',r:65},
+    {n:'Reto Ziegler',pos:'LB',r:65},{n:'Davide Frara',pos:'LWB',r:58},
+    {n:'Luca Paganini',pos:'CDM',r:62},{n:'Emanuele Terranova',pos:'CDM',r:61},
+    {n:'Emanuele Terranova',pos:'CM',r:61},{n:'Luca Paganini',pos:'CM',r:62},
+    {n:'Aleandro Rosi',pos:'CAM',r:63},{n:'Daniel Ciofani',pos:'RAM',r:64},
+    {n:'Daniel Ciofani',pos:'RW',r:64},{n:'Francesco Gori',pos:'LW',r:59},
+    {n:'Stefano Okaka',pos:'ST',r:64},{n:'Daniel Ciofani',pos:'ST',r:64},{n:'Francesco Gori',pos:'ST',r:59}
+  ]},
+  // ── EXTRA TEAMS ──────────────────────────────────────────────
+  {id:'chievo0203',name:'Chievo Verona',season:'2002/03',decade:'2000s',tier:'mid',col:'#f5c400',strength:61,predicted:8,players:[
+    {n:'Stefano Sorrentino',pos:'GK',r:72},{n:'Marco Storari',pos:'GK',r:70},
+    {n:'Aimo Diana',pos:'RB',r:68},{n:'Simone Perrotta',pos:'RB',r:71},
+    {n:'Lorenzo D\'Anna',pos:'CB',r:69},{n:'Davide Mandelli',pos:'CB',r:67},{n:'Simone Bentivoglio',pos:'CB',r:65},
+    {n:'Simone Bentivoglio',pos:'LB',r:65},{n:'Aimo Diana',pos:'LWB',r:68},
+    {n:'Eugenio Corini',pos:'CDM',r:73},{n:'Simone Perrotta',pos:'CDM',r:71},
+    {n:'Eugenio Corini',pos:'CM',r:73},{n:'Simone Perrotta',pos:'CM',r:71},
+    {n:'Massimo Marazzina',pos:'CAM',r:72},{n:'Simone Perrotta',pos:'RAM',r:71},
+    {n:'Massimo Marazzina',pos:'RW',r:72},{n:'Sergio Pellissier',pos:'LW',r:70},
+    {n:'Sergio Pellissier',pos:'ST',r:70},{n:'Massimo Marazzina',pos:'ST',r:72},{n:'Bernardo Mereu',pos:'ST',r:64}
+  ]},
+  {id:'palermo0607',name:'Palermo',season:'2006/07',decade:'2000s',tier:'mid',col:'#ff6600',strength:64,predicted:7,players:[
+    {n:'Alberto Fontana',pos:'GK',r:70},{n:'Matteo Sereni',pos:'GK',r:67},
+    {n:'Cristian Zaccardo',pos:'RB',r:72},{n:'Mattia Cassani',pos:'RB',r:68},
+    {n:'Fabio Grosso',pos:'CB',r:73},{n:'Nicolas Burdisso',pos:'CB',r:74},{n:'Simon Kjær',pos:'CB',r:69},
+    {n:'Fabio Grosso',pos:'LB',r:73},{n:'Cristian Zaccardo',pos:'LWB',r:72},
+    {n:'Mutarelli',pos:'CDM',r:68},{n:'Simplicio',pos:'CDM',r:70},
+    {n:'Simplicio',pos:'CM',r:70},{n:'Mattia Cassani',pos:'CM',r:68},
+    {n:'Fabrizio Miccoli',pos:'CAM',r:76},{n:'Amauri',pos:'RAM',r:74},
+    {n:'Fabrizio Miccoli',pos:'RW',r:76},{n:'Amauri',pos:'LW',r:74},
+    {n:'Amauri',pos:'ST',r:74},{n:'Fabrizio Miccoli',pos:'ST',r:76},{n:'Aleksandar Vasoski',pos:'ST',r:63}
+  ]},
+  {id:'genoa0809',name:'Genoa',season:'2008/09',decade:'2000s',tier:'mid',col:'#cc0000',strength:60,predicted:10,players:[
+    {n:'Eduardo',pos:'GK',r:65},{n:'Matteo Sereni',pos:'GK',r:68},
+    {n:'Mattia Cassani',pos:'RB',r:68},{n:'Domenico Criscito',pos:'RB',r:70},
+    {n:'Dario Dainelli',pos:'CB',r:69},{n:'Luca Antonini',pos:'CB',r:65},{n:'Andrea Gasbarroni',pos:'CB',r:64},
+    {n:'Luca Antonini',pos:'LB',r:65},{n:'Domenico Criscito',pos:'LWB',r:70},
+    {n:'Raffaele Palladino',pos:'CDM',r:66},{n:'Bosko Jankovic',pos:'CDM',r:68},
+    {n:'Rafinha',pos:'CM',r:70},{n:'Bosko Jankovic',pos:'CM',r:68},
+    {n:'Rodrigo Palacio',pos:'CAM',r:72},{n:'Rodrigo Palacio',pos:'RAM',r:72},
+    {n:'Rodrigo Palacio',pos:'RW',r:72},{n:'Mattia Cassani',pos:'LW',r:68},
+    {n:'Diego Milito',pos:'ST',r:78},{n:'Rodrigo Palacio',pos:'ST',r:72},{n:'Giuseppe Sculli',pos:'ST',r:66}
+  ]},
+  {id:'empoli1415',name:'Empoli',season:'2014/15',decade:'2010s',tier:'lower',col:'#0099cc',strength:53,predicted:14,players:[
+    {n:'Lukasz Skorupski',pos:'GK',r:70},{n:'Alberto Pelagotti',pos:'GK',r:61},
+    {n:'Aleandro Rosi',pos:'RB',r:63},{n:'Lorenzo Tonelli',pos:'RB',r:66},
+    {n:'Lorenzo Tonelli',pos:'CB',r:66},{n:'Manuel Pasqual',pos:'CB',r:67},{n:'Filippo Repetto',pos:'CB',r:61},
+    {n:'Manuel Pasqual',pos:'LB',r:67},{n:'Aleandro Rosi',pos:'LWB',r:63},
+    {n:'Marco Davide Faraoni',pos:'CDM',r:64},{n:'Riccardo Saponara',pos:'CDM',r:71},
+    {n:'Riccardo Saponara',pos:'CM',r:71},{n:'Marco Davide Faraoni',pos:'CM',r:64},
+    {n:'Riccardo Saponara',pos:'CAM',r:71},{n:'Massimo Maccarone',pos:'RAM',r:65},
+    {n:'Riccardo Saponara',pos:'RW',r:71},{n:'Daniele Croce',pos:'LW',r:64},
+    {n:'Massimo Maccarone',pos:'ST',r:65},{n:'Manuel Pucciarelli',pos:'ST',r:64},{n:'Daniele Croce',pos:'ST',r:64}
+  ]},
+  {id:'venezia2122',name:'Venezia',season:'2021/22',decade:'2020s',tier:'lower',col:'#1a1a1a',strength:49,predicted:18,players:[
+    {n:'Niki Maenpaa',pos:'GK',r:68},{n:'Luca Lezzerini',pos:'GK',r:64},
+    {n:'Tyronne Ebuehi',pos:'RB',r:65},{n:'Mattia Caldara',pos:'RB',r:66},
+    {n:'Pietro Ceccaroni',pos:'CB',r:65},{n:'Michael Svoboda',pos:'CB',r:63},{n:'Mattia Caldara',pos:'CB',r:66},
+    {n:'Ridgeciano Haps',pos:'LB',r:64},{n:'Gianluca Busio',pos:'LWB',r:65},
+    {n:'Daan Heymans',pos:'CDM',r:65},{n:'Tanner Tessmann',pos:'CDM',r:64},
+    {n:'Tanner Tessmann',pos:'CM',r:64},{n:'Daan Heymans',pos:'CM',r:65},
+    {n:'Mattia Aramu',pos:'CAM',r:70},{n:'Caleb Ekuban',pos:'RAM',r:65},
+    {n:'Mattia Aramu',pos:'RW',r:70},{n:'David Okereke',pos:'LW',r:66},
+    {n:'Thomas Henry',pos:'ST',r:68},{n:'David Okereke',pos:'ST',r:66},{n:'Mattia Aramu',pos:'ST',r:70}
+  ]},
+  {id:'atalanta0506',name:'Atalanta',season:'2005/06',decade:'2000s',tier:'mid',col:'#1e5fba',strength:59,predicted:10,players:[
+    {n:'Samir Handanovic',pos:'GK',r:71},{n:'Gennaro Iezzo',pos:'GK',r:65},
+    {n:'Cristian Zenoni',pos:'RB',r:67},{n:'Marco Andreolli',pos:'RB',r:63},
+    {n:'Dario Dainelli',pos:'CB',r:68},{n:'Andrea Masiello',pos:'CB',r:65},{n:'Lucio Filomeno',pos:'CB',r:62},
+    {n:'Giovanni Pasquale',pos:'LB',r:64},{n:'Cristian Zenoni',pos:'LWB',r:67},
+    {n:'Luca Cigarini',pos:'CDM',r:71},{n:'Luca Fusco',pos:'CDM',r:63},
+    {n:'Luca Cigarini',pos:'CM',r:71},{n:'Damiano Zenoni',pos:'CM',r:65},
+    {n:'Cristiano Doni',pos:'CAM',r:71},{n:'Cristiano Doni',pos:'RAM',r:71},
+    {n:'Damiano Zenoni',pos:'RW',r:65},{n:'Luca Della Rocca',pos:'LW',r:63},
+    {n:'Nelson Valdez',pos:'ST',r:69},{n:'Luca Toni',pos:'ST',r:78},{n:'Cristiano Doni',pos:'ST',r:71}
+  ]},
+  {id:'cremonese2223',name:'Cremonese',season:'2022/23',decade:'2020s',tier:'lower',col:'#cc0000',strength:44,predicted:20,players:[
+    {n:'Marco Carnesecchi',pos:'GK',r:70},{n:'Ionut Radu',pos:'GK',r:63},
+    {n:'Emanuele Valeri',pos:'RB',r:63},{n:'Leonardo Sernicola',pos:'RB',r:61},
+    {n:'Matteo Bianchetti',pos:'CB',r:62},{n:'Luka Lochoshvili',pos:'CB',r:63},{n:'Vasquez',pos:'CB',r:61},
+    {n:'Leonardo Sernicola',pos:'LB',r:61},{n:'Emanuele Valeri',pos:'LWB',r:63},
+    {n:'Michele Castagnetti',pos:'CDM',r:63},{n:'Emanuele Buonaiuto',pos:'CDM',r:62},
+    {n:'Michele Castagnetti',pos:'CM',r:63},{n:'Emanuele Buonaiuto',pos:'CM',r:62},
+    {n:'Cyriel Dessers',pos:'CAM',r:70},{n:'Felix Afena-Gyan',pos:'RAM',r:64},
+    {n:'Felix Afena-Gyan',pos:'RW',r:64},{n:'Cédric Gondo',pos:'LW',r:62},
+    {n:'Cyriel Dessers',pos:'ST',r:70},{n:'Cédric Gondo',pos:'ST',r:62},{n:'David Okereke',pos:'ST',r:66}
+  ]},
+  // ── NEW ELITE & TOP SIDES ──────────────────────────────────
+  {id:'juve0304',name:'Juventus',season:'2003/04',decade:'2000s',tier:'elite',col:'#1a1a1a',strength:92,predicted:1,players:[
+    {n:'Gianluigi Buffon',pos:'GK',r:94},{n:'Marco Storari',pos:'GK',r:74},
+    {n:'Gianluca Zambrotta',pos:'RB',r:87},{n:'Nicola Legrottaglie',pos:'RB',r:76},
+    {n:'Lilian Thuram',pos:'CB',r:86},{n:'Fabio Cannavaro',pos:'CB',r:90},{n:'Paolo Montero',pos:'CB',r:80},
+    {n:'Ciro Ferrara',pos:'LB',r:81},{n:'Jonathan Zebina',pos:'LWB',r:74},
+    {n:'Edgar Davids',pos:'CDM',r:86},{n:'Emerson',pos:'CDM',r:84},
+    {n:'Mauro Camoranesi',pos:'CM',r:83},{n:'Pavel Nedvěd',pos:'CM',r:90},
+    {n:'Alessandro Del Piero',pos:'CAM',r:91},{n:'Mauro Camoranesi',pos:'RAM',r:83},
+    {n:'Alessandro Del Piero',pos:'LW',r:91},{n:'Marcelo Zalayeta',pos:'RW',r:75},
+    {n:'David Trezeguet',pos:'ST',r:89},{n:'Alessandro Del Piero',pos:'ST',r:91},{n:'Zlatan Ibrahimovic',pos:'ST',r:88}
+  ]},
+  {id:'inter0607',name:'Inter Milan',season:'2006/07',decade:'2000s',tier:'elite',col:'#0033a0',strength:88,predicted:1,players:[
+    {n:'Júlio César',pos:'GK',r:87},{n:'Francesco Toldo',pos:'GK',r:80},
+    {n:'Maicon',pos:'RB',r:86},{n:'Ivan Córdoba',pos:'RB',r:82},
+    {n:'Marco Materazzi',pos:'CB',r:80},{n:'Iván Córdoba',pos:'CB',r:84},{n:'Nicolás Burdisso',pos:'CB',r:76},
+    {n:'Maxwell',pos:'LB',r:81},{n:'Cristian Chivu',pos:'LWB',r:78},
+    {n:'Esteban Cambiasso',pos:'CDM',r:86},{n:'Patrick Vieira',pos:'CDM',r:85},
+    {n:'Dejan Stanković',pos:'CM',r:83},{n:'Luis Figo',pos:'CM',r:84},
+    {n:'Luis Figo',pos:'CAM',r:84},{n:'Adriano',pos:'LAM',r:85},
+    {n:'Maicon',pos:'RWB',r:86},{n:'Adriano',pos:'LW',r:85},
+    {n:'Zlatan Ibrahimovic',pos:'ST',r:89},{n:'Adriano',pos:'ST',r:85},{n:'Hernan Crespo',pos:'ST',r:83}
+  ]},
+  {id:'milan0809',name:'AC Milan',season:'2008/09',decade:'2000s',tier:'elite',col:'#ac0000',strength:87,predicted:2,players:[
+    {n:'Dida',pos:'GK',r:83},{n:'Zeljko Kalac',pos:'GK',r:71},
+    {n:'Cafu',pos:'RB',r:82},{n:'Dario Simic',pos:'RB',r:70},
+    {n:'Alessandro Nesta',pos:'CB',r:89},{n:'Costacurta',pos:'CB',r:76},{n:'Kakha Kaladze',pos:'CB',r:76},
+    {n:'Paolo Maldini',pos:'LB',r:86},{n:'Serginho',pos:'LWB',r:76},
+    {n:'Andrea Pirlo',pos:'CDM',r:89},{n:'Gennaro Gattuso',pos:'CDM',r:83},
+    {n:'Clarence Seedorf',pos:'CM',r:83},{n:'Kaká',pos:'CAM',r:97},
+    {n:'Kaká',pos:'RAM',r:97},{n:'Clarence Seedorf',pos:'LAM',r:83},
+    {n:'Filippo Inzaghi',pos:'ST',r:82},{n:'Ronaldinho',pos:'LW',r:86},{n:'Andriy Shevchenko',pos:'ST',r:87}
+  ]},
+  {id:'roma0708',name:'AS Roma',season:'2007/08',decade:'2000s',tier:'good',col:'#8b1a1a',strength:82,predicted:2,players:[
+    {n:'Doni',pos:'GK',r:80},{n:'Ivan Pelizzoli',pos:'GK',r:69},
+    {n:'Christian Panucci',pos:'RB',r:78},{n:'Max Tonetto',pos:'RB',r:72},
+    {n:'Philippe Mexès',pos:'CB',r:82},{n:'Christian Chivu',pos:'CB',r:80},{n:'Marco Cassetti',pos:'CB',r:73},
+    {n:'Max Tonetto',pos:'LB',r:72},{n:'Christian Chivu',pos:'LWB',r:80},
+    {n:'Daniele De Rossi',pos:'CDM',r:84},{n:'Rodrigo Taddei',pos:'CDM',r:76},
+    {n:'Simone Perrotta',pos:'CM',r:79},{n:'Mancini',pos:'CM',r:77},
+    {n:'Francesco Totti',pos:'CAM',r:91},{n:'Simone Perrotta',pos:'RAM',r:79},
+    {n:'Mirko Vucinic',pos:'LW',r:80},{n:'Rodrigo Taddei',pos:'RW',r:76},
+    {n:'Luca Toni',pos:'ST',r:84},{n:'Mirko Vucinic',pos:'ST',r:80},{n:'Francesco Totti',pos:'ST',r:91}
+  ]},
+  {id:'fior0809',name:'Fiorentina',season:'2008/09',decade:'2000s',tier:'good',col:'#7b2d8b',strength:79,predicted:4,players:[
+    {n:'Sebastien Frey',pos:'GK',r:81},{n:'Boruc',pos:'GK',r:72},
+    {n:'Alessandro Gamberini',pos:'RB',r:74},{n:'Massimo Gobbi',pos:'RB',r:72},
+    {n:'Dario Dainelli',pos:'CB',r:74},{n:'Alessandro Gamberini',pos:'CB',r:74},{n:'Tomáš Ujfaluši',pos:'CB',r:77},
+    {n:'Massimo Gobbi',pos:'LB',r:72},{n:'Pasqual',pos:'LWB',r:70},
+    {n:'Zdravko Kuzmanović',pos:'CDM',r:74},{n:'Alessandro Diamanti',pos:'CDM',r:76},
+    {n:'Riccardo Montolivo',pos:'CM',r:82},{n:'Alessandro Diamanti',pos:'CM',r:76},
+    {n:'Adrian Mutu',pos:'CAM',r:83},{n:'Riccardo Montolivo',pos:'CAM',r:82},
+    {n:'Stevan Jovetić',pos:'LW',r:80},{n:'Marco Donadel',pos:'RW',r:70},
+    {n:'Adrian Mutu',pos:'ST',r:83},{n:'Stevan Jovetić',pos:'ST',r:80},{n:'Luca Toni',pos:'ST',r:82}
+  ]},
+  {id:'naples1920',name:'Napoli',season:'2019/20',decade:'2020s',tier:'good',col:'#087dc2',strength:80,predicted:3,players:[
+    {n:'Alex Meret',pos:'GK',r:78},{n:'David Ospina',pos:'GK',r:76},
+    {n:'Giovanni Di Lorenzo',pos:'RB',r:80},{n:'Konstantinos Manolas',pos:'RB',r:76},
+    {n:'Kalidou Koulibaly',pos:'CB',r:87},{n:'Konstantinos Manolas',pos:'CB',r:80},{n:'Nikola Maksimovic',pos:'CB',r:74},
+    {n:'Mario Rui',pos:'LB',r:74},{n:'Faouzi Ghoulam',pos:'LWB',r:74},
+    {n:'Fabian Ruiz',pos:'CDM',r:82},{n:'Diego Demme',pos:'CDM',r:76},
+    {n:'Piotr Zieliński',pos:'CM',r:84},{n:'Fabian Ruiz',pos:'CM',r:82},
+    {n:'Lorenzo Insigne',pos:'CAM',r:85},{n:'José Callejón',pos:'RAM',r:80},
+    {n:'Lorenzo Insigne',pos:'LW',r:85},{n:'José Callejón',pos:'RW',r:80},
+    {n:'Dries Mertens',pos:'ST',r:85},{n:'Arkadiusz Milik',pos:'ST',r:80},{n:'Lorenzo Insigne',pos:'ST',r:85}
+  ]},
+  {id:'juve1617',name:'Juventus',season:'2016/17',decade:'2010s',tier:'elite',col:'#1a1a1a',strength:91,predicted:1,players:[
+    {n:'Gianluigi Buffon',pos:'GK',r:92},{n:'Neto',pos:'GK',r:74},
+    {n:'Stephan Lichtsteiner',pos:'RB',r:80},{n:'Danilo',pos:'RB',r:76},
+    {n:'Leonardo Bonucci',pos:'CB',r:87},{n:'Giorgio Chiellini',pos:'CB',r:88},{n:'Andrea Barzagli',pos:'CB',r:83},
+    {n:'Álex Sandro',pos:'LB',r:84},{n:'Patrice Evra',pos:'LWB',r:76},
+    {n:'Claudio Marchisio',pos:'CDM',r:82},{n:'Miralem Pjanić',pos:'CDM',r:87},
+    {n:'Sami Khedira',pos:'CM',r:82},{n:'Miralem Pjanić',pos:'CM',r:87},
+    {n:'Paulo Dybala',pos:'CAM',r:88},{n:'Juan Cuadrado',pos:'RAM',r:80},
+    {n:'Juan Cuadrado',pos:'RW',r:80},{n:'Mario Mandžukić',pos:'LW',r:82},
+    {n:'Gonzalo Higuaín',pos:'ST',r:89},{n:'Paulo Dybala',pos:'ST',r:88},{n:'Mario Mandžukić',pos:'ST',r:82}
+  ]},
+  {id:'juve1819',name:'Juventus',season:'2018/19',decade:'2010s',tier:'elite',col:'#1a1a1a',strength:93,predicted:1,players:[
+    {n:'Wojciech Szczęsny',pos:'GK',r:85},{n:'Mattia Perin',pos:'GK',r:76},
+    {n:'João Cancelo',pos:'RB',r:83},{n:'Mattia De Sciglio',pos:'RB',r:74},
+    {n:'Leonardo Bonucci',pos:'CB',r:86},{n:'Giorgio Chiellini',pos:'CB',r:87},{n:'Daniele Rugani',pos:'CB',r:76},
+    {n:'Álex Sandro',pos:'LB',r:84},{n:'Giorgio Chiellini',pos:'LWB',r:87},
+    {n:'Miralem Pjanić',pos:'CDM',r:86},{n:'Blaise Matuidi',pos:'CDM',r:81},
+    {n:'Sami Khedira',pos:'CM',r:80},{n:'Rodrigo Bentancur',pos:'CM',r:78},
+    {n:'Paulo Dybala',pos:'CAM',r:87},{n:'Juan Cuadrado',pos:'RAM',r:80},
+    {n:'Juan Cuadrado',pos:'RW',r:80},{n:'Mario Mandžukić',pos:'LW',r:80},
+    {n:'Cristiano Ronaldo',pos:'ST',r:97},{n:'Paulo Dybala',pos:'ST',r:87},{n:'Mario Mandžukić',pos:'ST',r:80}
+  ]},
+  {id:'atalanta2021',name:'Atalanta',season:'2020/21',decade:'2020s',tier:'good',col:'#1e5fba',strength:81,predicted:3,players:[
+    {n:'Pierluigi Gollini',pos:'GK',r:78},{n:'Marco Sportiello',pos:'GK',r:74},
+    {n:'Hans Hateboer',pos:'RB',r:76},{n:'Rafael Tolói',pos:'RB',r:78},
+    {n:'Rafael Tolói',pos:'CB',r:78},{n:'Cristian Romero',pos:'CB',r:83},{n:'José Luis Palomino',pos:'CB',r:76},
+    {n:'Robin Gosens',pos:'LB',r:81},{n:'Alejandro Gómez',pos:'LWB',r:83},
+    {n:'Marten de Roon',pos:'CDM',r:80},{n:'Remo Freuler',pos:'CDM',r:79},
+    {n:'Mario Pašalić',pos:'CM',r:79},{n:'Alejandro Gómez',pos:'CM',r:83},
+    {n:'Josip Iličić',pos:'CAM',r:84},{n:'Duvan Zapata',pos:'LAM',r:85},
+    {n:'Hans Hateboer',pos:'RW',r:76},{n:'Robin Gosens',pos:'LW',r:81},
+    {n:'Duvan Zapata',pos:'ST',r:85},{n:'Josip Iličić',pos:'ST',r:84},{n:'Luis Muriel',pos:'ST',r:82}
+  ]},
+  {id:'lazio1819',name:'SS Lazio',season:'2018/19',decade:'2010s',tier:'good',col:'#4a9fd4',strength:78,predicted:4,players:[
+    {n:'Thomas Strakosha',pos:'GK',r:78},{n:'Marco Alia',pos:'GK',r:63},
+    {n:'Adam Marusic',pos:'RB',r:74},{n:'Patric',pos:'RB',r:70},
+    {n:'Ştefan Radu',pos:'CB',r:74},{n:'Luiz Felipe',pos:'CB',r:76},{n:'Patric',pos:'CB',r:70},
+    {n:'Senad Lulic',pos:'LB',r:74},{n:'Riza Durmisi',pos:'LWB',r:70},
+    {n:'Lucas Leiva',pos:'CDM',r:79},{n:'Sergej Milinković-Savić',pos:'CDM',r:85},
+    {n:'Sergej Milinković-Savić',pos:'CM',r:85},{n:'Luis Alberto',pos:'CM',r:84},
+    {n:'Luis Alberto',pos:'CAM',r:84},{n:'Felipe Anderson',pos:'RAM',r:82},
+    {n:'Felipe Anderson',pos:'RW',r:82},{n:'Senad Lulic',pos:'LW',r:74},
+    {n:'Ciro Immobile',pos:'ST',r:86},{n:'Joaquin Correa',pos:'ST',r:78},{n:'Felipe Caicedo',pos:'ST',r:73}
+  ]},
+  {id:'milan1112',name:'AC Milan',season:'2011/12',decade:'2010s',tier:'good',col:'#ac0000',strength:83,predicted:1,players:[
+    {n:'Christian Abbiati',pos:'GK',r:80},{n:'Marco Amelia',pos:'GK',r:72},
+    {n:'Ignazio Abate',pos:'RB',r:78},{n:'Daniele Bonera',pos:'RB',r:72},
+    {n:'Alessandro Nesta',pos:'CB',r:86},{n:'Thiago Silva',pos:'CB',r:88},{n:'Philippe Mexès',pos:'CB',r:80},
+    {n:'Luca Antonini',pos:'LB',r:72},{n:'Gianluca Zambrotta',pos:'LWB',r:76},
+    {n:'Andrea Pirlo',pos:'CDM',r:88},{n:'Gennaro Gattuso',pos:'CDM',r:80},
+    {n:'Clarence Seedorf',pos:'CM',r:80},{n:'Kevin-Prince Boateng',pos:'CM',r:80},
+    {n:'Kevin-Prince Boateng',pos:'CAM',r:80},{n:'Antonio Cassano',pos:'RAM',r:82},
+    {n:'Robinho',pos:'LW',r:80},{n:'Antonio Cassano',pos:'RW',r:82},
+    {n:'Zlatan Ibrahimovic',pos:'ST',r:90},{n:'Robinho',pos:'ST',r:80},{n:'Antonio Cassano',pos:'ST',r:82}
+  ]},
+  {id:'inter1920',name:'Inter Milan',season:'2019/20',decade:'2020s',tier:'good',col:'#0033a0',strength:84,predicted:2,players:[
+    {n:'Samir Handanovic',pos:'GK',r:83},{n:'Daniele Padelli',pos:'GK',r:70},
+    {n:'Danilo D\'Ambrosio',pos:'RB',r:76},{n:'Victor Moses',pos:'RB',r:74},
+    {n:'Stefan de Vrij',pos:'CB',r:84},{n:'Diego Godín',pos:'CB',r:83},{n:'Milan Škriniar',pos:'CB',r:84},
+    {n:'Ashley Young',pos:'LB',r:74},{n:'Kwadwo Asamoah',pos:'LWB',r:74},
+    {n:'Marcelo Brozović',pos:'CDM',r:84},{n:'Arturo Vidal',pos:'CDM',r:80},
+    {n:'Nicolò Barella',pos:'CM',r:82},{n:'Christian Eriksen',pos:'CM',r:83},
+    {n:'Christian Eriksen',pos:'CAM',r:83},{n:'Alexis Sánchez',pos:'LAM',r:79},
+    {n:'Victor Moses',pos:'RWB',r:74},{n:'Alexis Sánchez',pos:'LW',r:79},
+    {n:'Romelu Lukaku',pos:'ST',r:87},{n:'Lautaro Martínez',pos:'ST',r:84},{n:'Alexis Sánchez',pos:'ST',r:79}
+  ]},
+  // ── MORE MID TABLE & LOWER ─────────────────────────────────
+  {id:'bologna0304',name:'Bologna',season:'2003/04',decade:'2000s',tier:'mid',col:'#cc3300',strength:59,predicted:11,players:[
+    {n:'Gianluca Pagliuca',pos:'GK',r:74},{n:'Roberto Porrini',pos:'GK',r:62},
+    {n:'Massimo Bernardi',pos:'RB',r:64},{n:'Marco Colombo',pos:'RB',r:62},
+    {n:'Cristian Zanetti',pos:'CB',r:67},{n:'Giuseppe Pancaro',pos:'CB',r:68},{n:'Nicola Legrottaglie',pos:'CB',r:72},
+    {n:'Giuseppe Pancaro',pos:'LB',r:68},{n:'Massimo Bernardi',pos:'LWB',r:64},
+    {n:'Cristian Zanetti',pos:'CDM',r:67},{n:'Sergio Volpi',pos:'CDM',r:64},
+    {n:'Sergio Volpi',pos:'CM',r:64},{n:'Amedeo Carboni',pos:'CM',r:66},
+    {n:'Francesco Coco',pos:'CAM',r:68},{n:'Julio Cruz',pos:'RAM',r:72},
+    {n:'Julio Cruz',pos:'RW',r:72},{n:'Leonardo Colucci',pos:'LW',r:63},
+    {n:'Julio Cruz',pos:'ST',r:72},{n:'Antonio Busce',pos:'ST',r:63},{n:'Christian Vieri',pos:'ST',r:78}
+  ]},
+  {id:'lecce0203',name:'Lecce',season:'2002/03',decade:'2000s',tier:'lower',col:'#cc6600',strength:50,predicted:16,players:[
+    {n:'Mirko Pigliacelli',pos:'GK',r:64},{n:'Manuel Blasi',pos:'GK',r:58},
+    {n:'Giulio Falcone',pos:'RB',r:61},{n:'Marco Cassetti',pos:'RB',r:66},
+    {n:'Marco Cassetti',pos:'CB',r:66},{n:'Marco Fortin',pos:'CB',r:63},{n:'Roberto Cravero',pos:'CB',r:62},
+    {n:'Roberto Cravero',pos:'LB',r:62},{n:'Giulio Falcone',pos:'LWB',r:61},
+    {n:'Alessandro Budel',pos:'CDM',r:63},{n:'Alessandro Rosina',pos:'CDM',r:65},
+    {n:'Alessandro Budel',pos:'CM',r:63},{n:'Alessandro Rosina',pos:'CM',r:65},
+    {n:'Mirko Vucinic',pos:'CAM',r:71},{n:'Cesare Natali',pos:'RAM',r:60},
+    {n:'Mirko Vucinic',pos:'RW',r:71},{n:'Nakata',pos:'LW',r:61},
+    {n:'Mirko Vucinic',pos:'ST',r:71},{n:'Matteo Brighi',pos:'ST',r:63},{n:'Cesare Natali',pos:'ST',r:60}
+  ]},
+  {id:'ascoli0607',name:'Ascoli',season:'2006/07',decade:'2000s',tier:'lower',col:'#1a1a1a',strength:46,predicted:18,players:[
+    {n:'Stefano Sorrentino',pos:'GK',r:69},{n:'Simone Del Nero',pos:'GK',r:58},
+    {n:'Davide Cordone',pos:'RB',r:61},{n:'Emiliano Moretti',pos:'RB',r:65},
+    {n:'Emiliano Moretti',pos:'CB',r:65},{n:'Cesar Prates',pos:'CB',r:62},{n:'Giuliano Giannichedda',pos:'CB',r:64},
+    {n:'Giuliano Giannichedda',pos:'LB',r:64},{n:'Davide Cordone',pos:'LWB',r:61},
+    {n:'Marcello Gazzola',pos:'CDM',r:62},{n:'Mariano Bogliacino',pos:'CDM',r:61},
+    {n:'Marcello Gazzola',pos:'CM',r:62},{n:'Mariano Bogliacino',pos:'CM',r:61},
+    {n:'Pablo Cavallero',pos:'CAM',r:63},{n:'Massimo Marazzina',pos:'RAM',r:67},
+    {n:'Massimo Marazzina',pos:'RW',r:67},{n:'Alessandro Lucarelli',pos:'LW',r:59},
+    {n:'Massimo Marazzina',pos:'ST',r:67},{n:'Alessandro Lucarelli',pos:'ST',r:59},{n:'Luca Giraudo',pos:'ST',r:58}
+  ]},
+  {id:'livorno0708',name:'Livorno',season:'2007/08',decade:'2000s',tier:'lower',col:'#cc0000',strength:48,predicted:17,players:[
+    {n:'Luca Berti',pos:'GK',r:65},{n:'Vittorio Bellavista',pos:'GK',r:57},
+    {n:'Franco Brienza',pos:'RB',r:63},{n:'Alessandro Potenza',pos:'RB',r:61},
+    {n:'Alessandro Potenza',pos:'CB',r:61},{n:'Nicola Pozzi',pos:'CB',r:60},{n:'Cesare Bovo',pos:'CB',r:65},
+    {n:'Cesare Bovo',pos:'LB',r:65},{n:'Franco Brienza',pos:'LWB',r:63},
+    {n:'Stefano Fiore',pos:'CDM',r:69},{n:'Daniele Croce',pos:'CDM',r:62},
+    {n:'Stefano Fiore',pos:'CM',r:69},{n:'Daniele Croce',pos:'CM',r:62},
+    {n:'Stefano Fiore',pos:'CAM',r:69},{n:'Nicola Amoruso',pos:'RAM',r:67},
+    {n:'Nicola Amoruso',pos:'RW',r:67},{n:'Christian Manfredini',pos:'LW',r:61},
+    {n:'Nicola Amoruso',pos:'ST',r:67},{n:'Christian Manfredini',pos:'ST',r:61},{n:'Nadjim Abdou',pos:'ST',r:59}
+  ]},
+  {id:'catania1011',name:'Catania',season:'2010/11',decade:'2010s',tier:'mid',col:'#cc3300',strength:57,predicted:12,players:[
+    {n:'Albano Bizzarri',pos:'GK',r:70},{n:'Stefano Gattuso',pos:'GK',r:60},
+    {n:'Nicola Legrottaglie',pos:'RB',r:70},{n:'Pablo Alvarez',pos:'RB',r:63},
+    {n:'Nicola Legrottaglie',pos:'CB',r:70},{n:'Mariano Izco',pos:'CB',r:67},{n:'Ciro Capuano',pos:'CB',r:63},
+    {n:'Pablo Alvarez',pos:'LB',r:63},{n:'Nicola Legrottaglie',pos:'LWB',r:70},
+    {n:'Mariano Izco',pos:'CDM',r:67},{n:'Pablo Barrientos',pos:'CDM',r:68},
+    {n:'Pablo Barrientos',pos:'CM',r:68},{n:'Gaetano D\'Agostino',pos:'CM',r:68},
+    {n:'Gaetano D\'Agostino',pos:'CAM',r:68},{n:'Nicolas Spolli',pos:'RAM',r:64},
+    {n:'Marco Biagianti',pos:'RW',r:65},{n:'Maxi López',pos:'LW',r:69},
+    {n:'Maxi López',pos:'ST',r:69},{n:'Pablo Hernandez',pos:'ST',r:68},{n:'German Denis',pos:'ST',r:70}
+  ]},
+  {id:'cesena1011',name:'Cesena',season:'2010/11',decade:'2010s',tier:'lower',col:'#1a1a1a',strength:51,predicted:15,players:[
+    {n:'Zeljko Brkic',pos:'GK',r:68},{n:'Dino Fava',pos:'GK',r:57},
+    {n:'Luca Ceccarelli',pos:'RB',r:61},{n:'Davide Succi',pos:'RB',r:59},
+    {n:'Davide Succi',pos:'CB',r:59},{n:'Alessandro Crescenzi',pos:'CB',r:62},{n:'Luca Ceccarelli',pos:'CB',r:61},
+    {n:'Christian Lanzafame',pos:'LB',r:63},{n:'Alessandro Crescenzi',pos:'LWB',r:62},
+    {n:'Andrea Lazzari',pos:'CDM',r:63},{n:'Giacomo Beretta',pos:'CDM',r:60},
+    {n:'Andrea Lazzari',pos:'CM',r:63},{n:'Giacomo Beretta',pos:'CM',r:60},
+    {n:'Christian Lanzafame',pos:'CAM',r:63},{n:'Daniele Galloppa',pos:'RAM',r:62},
+    {n:'Christian Lanzafame',pos:'RW',r:63},{n:'Daniele Galloppa',pos:'LW',r:62},
+    {n:'Luca Ceccarelli',pos:'ST',r:61},{n:'Nicola Pozzi',pos:'ST',r:61},{n:'Pedro Mendes',pos:'ST',r:60}
+  ]},
+  {id:'crotone1617',name:'Crotone',season:'2016/17',decade:'2010s',tier:'lower',col:'#cc0000',strength:47,predicted:19,players:[
+    {n:'Alex Cordaz',pos:'GK',r:70},{n:'Napolitano',pos:'GK',r:59},
+    {n:'Giulio Donati',pos:'RB',r:64},{n:'Mario Sampirisi',pos:'RB',r:62},
+    {n:'Mario Sampirisi',pos:'CB',r:62},{n:'Nicola Spolli',pos:'CB',r:63},{n:'Luca Marrone',pos:'CB',r:63},
+    {n:'Luca Marrone',pos:'LB',r:63},{n:'Giulio Donati',pos:'LWB',r:64},
+    {n:'Marcus Rohden',pos:'CDM',r:64},{n:'Eduardo',pos:'CDM',r:62},
+    {n:'Marcus Rohden',pos:'CM',r:64},{n:'Eduardo',pos:'CM',r:62},
+    {n:'Diego Falcinelli',pos:'CAM',r:66},{n:'Ivan Cabella',pos:'RAM',r:65},
+    {n:'Ivan Cabella',pos:'RW',r:65},{n:'Stefano Napoleoni',pos:'LW',r:61},
+    {n:'Diego Falcinelli',pos:'ST',r:66},{n:'Stefano Napoleoni',pos:'ST',r:61},{n:'Marcus Rohden',pos:'ST',r:64}
+  ]},
+  {id:'spezia2021',name:'Spezia',season:'2020/21',decade:'2020s',tier:'lower',col:'#000080',strength:52,predicted:15,players:[
+    {n:'Ivan Provedel',pos:'GK',r:72},{n:'Jeroen Zoet',pos:'GK',r:66},
+    {n:'Giulio Maggiore',pos:'RB',r:65},{n:'Claudio Terzi',pos:'RB',r:63},
+    {n:'Claudio Terzi',pos:'CB',r:63},{n:'Ardian Ismajli',pos:'CB',r:64},{n:'Erlic',pos:'CB',r:63},
+    {n:'Riccardo Marchizza',pos:'LB',r:62},{n:'Giulio Maggiore',pos:'LWB',r:65},
+    {n:'Giulio Maggiore',pos:'CDM',r:65},{n:'Matteo Ricci',pos:'CDM',r:63},
+    {n:'Matteo Ricci',pos:'CM',r:63},{n:'Simone Bastoni',pos:'CM',r:64},
+    {n:'Simone Bastoni',pos:'CAM',r:64},{n:'Agudelo',pos:'RAM',r:63},
+    {n:'Agudelo',pos:'RW',r:63},{n:'Emmanuel Gyasi',pos:'LW',r:64},
+    {n:'M\'Bala Nzola',pos:'ST',r:70},{n:'Emmanuel Gyasi',pos:'ST',r:64},{n:'Simone Bastoni',pos:'ST',r:64}
+  ]},
+  {id:'udinese1920',name:'Udinese',season:'2019/20',decade:'2020s',tier:'mid',col:'#1a1a1a',strength:60,predicted:10,players:[
+    {n:'Juan Musso',pos:'GK',r:76},{n:'Nicolas Sava',pos:'GK',r:62},
+    {n:'Samir',pos:'RB',r:67},{n:'Hidde ter Avest',pos:'RB',r:63},
+    {n:'Rodrigo Becao',pos:'CB',r:70},{n:'Sebastian De Maio',pos:'CB',r:66},{n:'Samir',pos:'CB',r:67},
+    {n:'Hidde ter Avest',pos:'LB',r:63},{n:'Rodrigo Becao',pos:'LWB',r:70},
+    {n:'Rolando Mandragora',pos:'CDM',r:70},{n:'Mato Jajalo',pos:'CDM',r:65},
+    {n:'Rolando Mandragora',pos:'CM',r:70},{n:'Ken Sema',pos:'CM',r:65},
+    {n:'Rodrigo De Paul',pos:'CAM',r:76},{n:'Ignacio Pussetto',pos:'RAM',r:67},
+    {n:'Ignacio Pussetto',pos:'RW',r:67},{n:'Ken Sema',pos:'LW',r:65},
+    {n:'Stefano Okaka',pos:'ST',r:66},{n:'Kevin Lasagna',pos:'ST',r:68},{n:'Rodrigo De Paul',pos:'ST',r:76}
+  ]},
+  {id:'parma1920',name:'Parma',season:'2019/20',decade:'2020s',tier:'mid',col:'#c8a000',strength:63,predicted:9,players:[
+    {n:'Luigi Sepe',pos:'GK',r:74},{n:'Simone Colombi',pos:'GK',r:62},
+    {n:'Matteo Darmian',pos:'RB',r:73},{n:'Simone Iacoponi',pos:'RB',r:66},
+    {n:'Vincent Laurini',pos:'CB',r:65},{n:'Simone Iacoponi',pos:'CB',r:66},{n:'Bruno Alves',pos:'CB',r:70},
+    {n:'Riccardo Gagliolo',pos:'LB',r:65},{n:'Hernani',pos:'LWB',r:66},
+    {n:'Hernani',pos:'CDM',r:66},{n:'Juraj Kucka',pos:'CDM',r:71},
+    {n:'Juraj Kucka',pos:'CM',r:71},{n:'Gaston Brugman',pos:'CM',r:65},
+    {n:'Dejan Kulusevski',pos:'CAM',r:76},{n:'Gervinho',pos:'RAM',r:74},
+    {n:'Gervinho',pos:'RW',r:74},{n:'Dejan Kulusevski',pos:'LW',r:76},
+    {n:'Roberto Inglese',pos:'ST',r:70},{n:'Andreas Cornelius',pos:'ST',r:68},{n:'Gervinho',pos:'ST',r:74}
+  ]},
+  // ── 1990s TEAMS ───────────────────────────────────────────
+  {id:'milan9394',name:'AC Milan',season:'1993/94',decade:'1990s',tier:'elite',col:'#ac0000',strength:96,predicted:1,players:[
+    {n:'Sebastiano Rossi',pos:'GK',r:84},{n:'Simone Toni',pos:'GK',r:70},
+    {n:'Mauro Tassotti',pos:'RB',r:82},{n:'Christian Panucci',pos:'RB',r:78},
+    {n:'Paolo Maldini',pos:'CB',r:92},{n:'Costacurta',pos:'CB',r:88},{n:'Christian Panucci',pos:'CB',r:76},
+    {n:'Zvonimir Boban',pos:'LB',r:86},{n:'Paolo Maldini',pos:'LWB',r:92},
+    {n:'Demetrio Albertini',pos:'CDM',r:84},{n:'Marcel Desailly',pos:'CDM',r:88},
+    {n:'Zvonimir Boban',pos:'CM',r:86},{n:'Demetrio Albertini',pos:'CM',r:84},
+    {n:'Zvonimir Boban',pos:'CAM',r:86},{n:'Donadoni',pos:'RAM',r:80},
+    {n:'Donadoni',pos:'RW',r:80},{n:'Savicevic',pos:'LW',r:88},
+    {n:'Marco van Basten',pos:'ST',r:94},{n:'Savicevic',pos:'ST',r:88},{n:'Daniele Massaro',pos:'ST',r:80}
+  ]},
+  {id:'juve9495',name:'Juventus',season:'1994/95',decade:'1990s',tier:'elite',col:'#1a1a1a',strength:90,predicted:1,players:[
+    {n:'Angelo Peruzzi',pos:'GK',r:84},{n:'Michelangelo Rampulla',pos:'GK',r:74},
+    {n:'Ciro Ferrara',pos:'RB',r:82},{n:'Sergio Porrini',pos:'RB',r:76},
+    {n:'Gianluca Pessotto',pos:'CB',r:78},{n:'Ciro Ferrara',pos:'CB',r:82},{n:'Paulo Sousa',pos:'CB',r:74},
+    {n:'Gianluca Pessotto',pos:'LB',r:78},{n:'Antonio Conte',pos:'LWB',r:78},
+    {n:'Antonio Conte',pos:'CDM',r:78},{n:'Paulo Sousa',pos:'CDM',r:74},
+    {n:'Didier Deschamps',pos:'CM',r:84},{n:'Antonio Conte',pos:'CM',r:78},
+    {n:'Roberto Baggio',pos:'CAM',r:94},{n:'Fabrizio Ravanelli',pos:'RAM',r:82},
+    {n:'Fabrizio Ravanelli',pos:'RW',r:82},{n:'Alen Boksic',pos:'LW',r:84},
+    {n:'Roberto Baggio',pos:'ST',r:94},{n:'Fabrizio Ravanelli',pos:'ST',r:82},{n:'Alen Boksic',pos:'ST',r:84}
+  ]},
+  {id:'juve9596',name:'Juventus',season:'1995/96',decade:'1990s',tier:'elite',col:'#1a1a1a',strength:92,predicted:1,players:[
+    {n:'Angelo Peruzzi',pos:'GK',r:86},{n:'Michelangelo Rampulla',pos:'GK',r:74},
+    {n:'Ciro Ferrara',pos:'RB',r:84},{n:'Moreno Torricelli',pos:'RB',r:78},
+    {n:'Paolo Montero',pos:'CB',r:82},{n:'Ciro Ferrara',pos:'CB',r:84},{n:'Moreno Torricelli',pos:'CB',r:78},
+    {n:'Gianluca Pessotto',pos:'LB',r:80},{n:'Gianluca Pessotto',pos:'LWB',r:80},
+    {n:'Didier Deschamps',pos:'CDM',r:86},{n:'Antonio Conte',pos:'CDM',r:80},
+    {n:'Didier Deschamps',pos:'CM',r:86},{n:'Paulo Sousa',pos:'CM',r:76},
+    {n:'Alessandro Del Piero',pos:'CAM',r:88},{n:'Zinedine Zidane',pos:'CAM',r:94},
+    {n:'Zinedine Zidane',pos:'RAM',r:94},{n:'Alen Boksic',pos:'LW',r:82},
+    {n:'Fabrizio Ravanelli',pos:'ST',r:84},{n:'Alen Boksic',pos:'ST',r:82},{n:'Michele Padovano',pos:'ST',r:76}
+  ]},
+  {id:'milan9899',name:'AC Milan',season:'1998/99',decade:'1990s',tier:'good',col:'#ac0000',strength:78,predicted:3,players:[
+    {n:'Dida',pos:'GK',r:82},{n:'Sebastiano Rossi',pos:'GK',r:78},
+    {n:'Cafu',pos:'RB',r:88},{n:'Christian Panucci',pos:'RB',r:78},
+    {n:'Alessandro Nesta',pos:'CB',r:88},{n:'Costacurta',pos:'CB',r:82},{n:'Dario Simic',pos:'CB',r:72},
+    {n:'Paolo Maldini',pos:'LB',r:90},{n:'Dario Simic',pos:'LWB',r:72},
+    {n:'Demetrio Albertini',pos:'CDM',r:84},{n:'Zvonimir Boban',pos:'CDM',r:84},
+    {n:'Clarence Seedorf',pos:'CM',r:84},{n:'Gennaro Gattuso',pos:'CM',r:78},
+    {n:'Rui Costa',pos:'CAM',r:86},{n:'George Weah',pos:'RAM',r:88},
+    {n:'George Weah',pos:'RW',r:88},{n:'Savicevic',pos:'LW',r:82},
+    {n:'George Weah',pos:'ST',r:88},{n:'Oliver Bierhoff',pos:'ST',r:82},{n:'Maurizio Ganz',pos:'ST',r:74}
+  ]},
+  {id:'lazio9899',name:'SS Lazio',season:'1998/99',decade:'1990s',tier:'good',col:'#4a9fd4',strength:82,predicted:2,players:[
+    {n:'Luca Marchegiani',pos:'GK',r:82},{n:'Luca Turci',pos:'GK',r:68},
+    {n:'Alessandro Nesta',pos:'RB',r:90},{n:'Diego Fuser',pos:'RB',r:76},
+    {n:'Sinisa Mihajlovic',pos:'CB',r:84},{n:'Alessandro Nesta',pos:'CB',r:90},{n:'Matías Almeyda',pos:'CB',r:76},
+    {n:'Sinisa Mihajlovic',pos:'LB',r:84},{n:'Matías Almeyda',pos:'LWB',r:76},
+    {n:'Matías Almeyda',pos:'CDM',r:76},{n:'Dejan Stanković',pos:'CDM',r:80},
+    {n:'Juan Sebastián Verón',pos:'CM',r:88},{n:'Dejan Stanković',pos:'CM',r:80},
+    {n:'Pavel Nedvěd',pos:'CAM',r:86},{n:'Juan Sebastián Verón',pos:'CAM',r:88},
+    {n:'Pavel Nedvěd',pos:'RW',r:86},{n:'Sérgio Conceiçao',pos:'LW',r:80},
+    {n:'Marcelo Salas',pos:'ST',r:82},{n:'Pierluigi Casiraghi',pos:'ST',r:78},{n:'Bernardo Corradi',pos:'ST',r:72}
+  ]},
+  {id:'napoli9091',name:'Napoli',season:'1990/91',decade:'1990s',tier:'elite',col:'#087dc2',strength:88,predicted:1,players:[
+    {n:'Giovanni Galli',pos:'GK',r:80},{n:'Raffaele Di Fusco',pos:'GK',r:72},
+    {n:'Giovanni Francini',pos:'RB',r:74},{n:'Massimo Baroni',pos:'RB',r:72},
+    {n:'Ciro Ferrara',pos:'CB',r:82},{n:'Giorgio Bresciani',pos:'CB',r:74},{n:'Massimo Baroni',pos:'CB',r:72},
+    {n:'Mario Garella',pos:'LB',r:70},{n:'Giovanni Francini',pos:'LWB',r:74},
+    {n:'Andrea Carnevale',pos:'CDM',r:76},{n:'Salvatore Bagni',pos:'CDM',r:74},
+    {n:'Salvatore Bagni',pos:'CM',r:74},{n:'Ciro Ferrara',pos:'CM',r:80},
+    {n:'Diego Maradona',pos:'CAM',r:97},{n:'Diego Maradona',pos:'RAM',r:97},
+    {n:'Diego Maradona',pos:'RW',r:97},{n:'Gianfranco Zola',pos:'LW',r:84},
+    {n:'Careca',pos:'ST',r:86},{n:'Gianfranco Zola',pos:'ST',r:84},{n:'Giovanni Francini',pos:'ST',r:72}
+  ]},
+  {id:'fior9697',name:'Fiorentina',season:'1996/97',decade:'1990s',tier:'good',col:'#7b2d8b',strength:80,predicted:3,players:[
+    {n:'Francesco Toldo',pos:'GK',r:82},{n:'Sebastian Frey',pos:'GK',r:74},
+    {n:'Angelo Di Livio',pos:'RB',r:78},{n:'Lorenzo Amoruso',pos:'RB',r:74},
+    {n:'Lorenzo Amoruso',pos:'CB',r:74},{n:'Pasquale Padalino',pos:'CB',r:72},{n:'Amedeo Carboni',pos:'CB',r:78},
+    {n:'Amedeo Carboni',pos:'LB',r:78},{n:'Angelo Di Livio',pos:'LWB',r:78},
+    {n:'Dino Baggio',pos:'CDM',r:80},{n:'Lubomir Moravcik',pos:'CDM',r:78},
+    {n:'Lubomir Moravcik',pos:'CM',r:78},{n:'Angelo Di Livio',pos:'CM',r:76},
+    {n:'Gabriel Batistuta',pos:'CAM',r:90},{n:'Rui Costa',pos:'CAM',r:88},
+    {n:'Rui Costa',pos:'RAM',r:88},{n:'Stefan Schwoch',pos:'LW',r:74},
+    {n:'Gabriel Batistuta',pos:'ST',r:90},{n:'Stefan Schwoch',pos:'ST',r:74},{n:'Edmundo',pos:'ST',r:84}
+  ]},
+  {id:'parma9899',name:'Parma',season:'1998/99',decade:'1990s',tier:'good',col:'#c8a000',strength:84,predicted:2,players:[
+    {n:'Gianluigi Buffon',pos:'GK',r:86},{n:'Luca Bucci',pos:'GK',r:76},
+    {n:'Massimo Bizzarri',pos:'RB',r:72},{n:'Dino Baggio',pos:'RB',r:76},
+    {n:'Fabio Cannavaro',pos:'CB',r:88},{n:'Lilian Thuram',pos:'CB',r:88},{n:'Daniele Bonera',pos:'CB',r:70},
+    {n:'Lilian Thuram',pos:'LB',r:88},{n:'Massimo Bizzarri',pos:'LWB',r:72},
+    {n:'Dino Baggio',pos:'CDM',r:80},{n:'Mauro Sensini',pos:'CDM',r:76},
+    {n:'Juan Sebastián Verón',pos:'CM',r:88},{n:'Dino Baggio',pos:'CM',r:80},
+    {n:'Hernán Crespo',pos:'CAM',r:86},{n:'Enrico Chiesa',pos:'RAM',r:78},
+    {n:'Enrico Chiesa',pos:'RW',r:78},{n:'Sébastien Frey',pos:'LW',r:72},
+    {n:'Hernán Crespo',pos:'ST',r:86},{n:'Enrico Chiesa',pos:'ST',r:78},{n:'Dino Baggio',pos:'ST',r:76}
+  ]},
+  {id:'inter9394',name:'Inter Milan',season:'1993/94',decade:'1990s',tier:'good',col:'#0033a0',strength:79,predicted:3,players:[
+    {n:'Walter Zenga',pos:'GK',r:82},{n:'Gianluca Pagliuca',pos:'GK',r:80},
+    {n:'Javier Zanetti',pos:'RB',r:84},{n:'Massimo Paganin',pos:'RB',r:72},
+    {n:'Riccardo Ferri',pos:'CB',r:80},{n:'Gianluca Pagliuca',pos:'CB',r:72},{n:'Massimo Paganin',pos:'CB',r:72},
+    {n:'Nicola Berti',pos:'LB',r:78},{n:'Javier Zanetti',pos:'LWB',r:84},
+    {n:'Nicola Berti',pos:'CDM',r:78},{n:'Denis Bergomi',pos:'CDM',r:76},
+    {n:'Benoit Cauet',pos:'CM',r:74},{n:'Nicola Berti',pos:'CM',r:78},
+    {n:'Dennis Bergkamp',pos:'CAM',r:90},{n:'Dennis Bergkamp',pos:'RAM',r:90},
+    {n:'Dennis Bergkamp',pos:'RW',r:90},{n:'Wim Jonk',pos:'LW',r:78},
+    {n:'Dennis Bergkamp',pos:'ST',r:90},{n:'Wim Jonk',pos:'ST',r:78},{n:'Massimo Paganin',pos:'ST',r:68}
+  ]},
+  {id:'roma9192',name:'AS Roma',season:'1991/92',decade:'1990s',tier:'mid',col:'#8b1a1a',strength:70,predicted:6,players:[
+    {n:'Giovanni Cervone',pos:'GK',r:76},{n:'Luca Bucci',pos:'GK',r:70},
+    {n:'Amedeo Carboni',pos:'RB',r:76},{n:'Giancarlo Marocchi',pos:'RB',r:72},
+    {n:'Aldair',pos:'CB',r:82},{n:'Amedeo Carboni',pos:'CB',r:76},{n:'Bruno Neri',pos:'CB',r:70},
+    {n:'Bruno Neri',pos:'LB',r:70},{n:'Amedeo Carboni',pos:'LWB',r:76},
+    {n:'Giancarlo Marocchi',pos:'CDM',r:72},{n:'Thomas Haessler',pos:'CDM',r:78},
+    {n:'Thomas Haessler',pos:'CM',r:78},{n:'Giancarlo Marocchi',pos:'CM',r:72},
+    {n:'Rudi Voller',pos:'CAM',r:82},{n:'Thomas Haessler',pos:'RAM',r:78},
+    {n:'Rudi Voller',pos:'RW',r:82},{n:'Antonio Tempestilli',pos:'LW',r:68},
+    {n:'Rudi Voller',pos:'ST',r:82},{n:'Francesco Totti',pos:'ST',r:78},{n:'Marco Delvecchio',pos:'ST',r:70}
+  ]},
+  {id:'atalanta9394',name:'Atalanta',season:'1993/94',decade:'1990s',tier:'mid',col:'#1e5fba',strength:60,predicted:10,players:[
+    {n:'Fabrizio Ferron',pos:'GK',r:72},{n:'Michele Compagno',pos:'GK',r:62},
+    {n:'Mirco Avolio',pos:'RB',r:66},{n:'Mauro Ganz',pos:'RB',r:64},
+    {n:'Alberico Evani',pos:'CB',r:68},{n:'Francesco Colonnese',pos:'CB',r:70},{n:'Diego Fuser',pos:'CB',r:68},
+    {n:'Diego Fuser',pos:'LB',r:68},{n:'Mirco Avolio',pos:'LWB',r:66},
+    {n:'Stefano Eranio',pos:'CDM',r:72},{n:'Filippo Inzaghi',pos:'CDM',r:70},
+    {n:'Stefano Eranio',pos:'CM',r:72},{n:'Giovanni Cornacchini',pos:'CM',r:68},
+    {n:'Maurizio Ganz',pos:'CAM',r:72},{n:'Stefano Eranio',pos:'RAM',r:72},
+    {n:'Stefano Eranio',pos:'RW',r:72},{n:'Giovanni Cornacchini',pos:'LW',r:68},
+    {n:'Maurizio Ganz',pos:'ST',r:72},{n:'Filippo Inzaghi',pos:'ST',r:74},{n:'Marco Nappi',pos:'ST',r:66}
+  ]},
+  {id:'sampdoria9091',name:'Sampdoria',season:'1990/91',decade:'1990s',tier:'good',col:'#1a4a8f',strength:82,predicted:2,players:[
+    {n:'Gianluca Pagliuca',pos:'GK',r:84},{n:'Ivano Bordon',pos:'GK',r:76},
+    {n:'Pietro Vierchowod',pos:'RB',r:82},{n:'Moreno Mannini',pos:'RB',r:78},
+    {n:'Pietro Vierchowod',pos:'CB',r:82},{n:'Adri Icardi',pos:'CB',r:74},{n:'Moreno Mannini',pos:'CB',r:78},
+    {n:'Srečko Katanec',pos:'LB',r:78},{n:'Fausto Pari',pos:'LWB',r:72},
+    {n:'Fausto Pari',pos:'CDM',r:72},{n:'Srečko Katanec',pos:'CDM',r:78},
+    {n:'Toninho Cerezo',pos:'CM',r:82},{n:'Srečko Katanec',pos:'CM',r:78},
+    {n:'Roberto Mancini',pos:'CAM',r:88},{n:'Attilio Lombardo',pos:'RAM',r:80},
+    {n:'Attilio Lombardo',pos:'RW',r:80},{n:'Gianluca Vialli',pos:'LW',r:88},
+    {n:'Gianluca Vialli',pos:'ST',r:88},{n:'Roberto Mancini',pos:'ST',r:88},{n:'Marco Lanna',pos:'ST',r:68}
+  ]},
+  {id:'torino9192',name:'Torino',season:'1991/92',decade:'1990s',tier:'mid',col:'#8b1a1a',strength:65,predicted:7,players:[
+    {n:'Luca Marchegiani',pos:'GK',r:80},{n:'Pasquale Rocco',pos:'GK',r:66},
+    {n:'Sergio Longo',pos:'RB',r:68},{n:'Mirko Sordo',pos:'RB',r:66},
+    {n:'Giorgio Ferrini',pos:'CB',r:70},{n:'Luca Benedetti',pos:'CB',r:68},{n:'Mirko Sordo',pos:'CB',r:66},
+    {n:'Mirko Sordo',pos:'LB',r:66},{n:'Sergio Longo',pos:'LWB',r:68},
+    {n:'Cravero',pos:'CDM',r:72},{n:'Policano',pos:'CDM',r:68},
+    {n:'Cravero',pos:'CM',r:72},{n:'Renato Zaccarelli',pos:'CM',r:68},
+    {n:'Lentini',pos:'CAM',r:82},{n:'Lentini',pos:'RAM',r:82},
+    {n:'Lentini',pos:'RW',r:82},{n:'Aguilera',pos:'LW',r:74},
+    {n:'Marco Ferrante',pos:'ST',r:74},{n:'Aguilera',pos:'ST',r:74},{n:'Zaccarelli',pos:'ST',r:68}
+  ]},
+  {id:'cagliari9394',name:'Cagliari',season:'1993/94',decade:'1990s',tier:'lower',col:'#cc0000',strength:55,predicted:13,players:[
+    {n:'Armando Pantanelli',pos:'GK',r:70},{n:'Lorenzo Squizzi',pos:'GK',r:62},
+    {n:'Alessandro Bianchi',pos:'RB',r:64},{n:'Raffaele Ametrano',pos:'RB',r:62},
+    {n:'Giulio Falcone',pos:'CB',r:66},{n:'Alessandro Bianchi',pos:'CB',r:64},{n:'Pierluigi Casiraghi',pos:'CB',r:72},
+    {n:'Luca Falcone',pos:'LB',r:64},{n:'Alessandro Bianchi',pos:'LWB',r:64},
+    {n:'Claudio Bresciani',pos:'CDM',r:66},{n:'Raffaele Ametrano',pos:'CDM',r:62},
+    {n:'Claudio Bresciani',pos:'CM',r:66},{n:'Raffaele Ametrano',pos:'CM',r:62},
+    {n:'Marcello Cois',pos:'CAM',r:68},{n:'Gianfranco Zola',pos:'CAM',r:84},
+    {n:'Gianfranco Zola',pos:'RAM',r:84},{n:'Marcello Cois',pos:'LW',r:68},
+    {n:'Gianfranco Zola',pos:'ST',r:84},{n:'Marcello Cois',pos:'ST',r:68},{n:'Marco Nappi',pos:'ST',r:64}
+  ]},
+  // ── MORE 1990s — MID TABLE & SURPRISE FINISHERS ──────────────
+  {id:'verona9091',name:'Hellas Verona',season:'1990/91',decade:'1990s',tier:'mid',col:'#1a3a8f',strength:61,predicted:8,players:[
+    {n:'Pietro Fanna',pos:'GK',r:68},{n:'Roberto Fiori',pos:'GK',r:65},
+    {n:'Mauro Gibellini',pos:'RB',r:66},{n:'Giuliano Marcolin',pos:'RB',r:68},
+    {n:'Mauro Gibellini',pos:'CB',r:66},{n:'Pasquale Bruno',pos:'CB',r:72},{n:'Massimo Briaschi',pos:'CB',r:64},
+    {n:'Massimo Briaschi',pos:'LB',r:64},{n:'Giuliano Marcolin',pos:'LWB',r:68},
+    {n:'Giuliano Marcolin',pos:'CDM',r:68},{n:'Walter Schachner',pos:'CDM',r:70},
+    {n:'Walter Schachner',pos:'CM',r:70},{n:'Antonio Cabrini',pos:'CM',r:74},
+    {n:'Antonio Cabrini',pos:'CAM',r:74},{n:'Preben Elkjaer',pos:'RAM',r:78},
+    {n:'Preben Elkjaer',pos:'RW',r:78},{n:'Hans-Peter Briegel',pos:'LW',r:74},
+    {n:'Preben Elkjaer',pos:'ST',r:78},{n:'Roberto Tricella',pos:'ST',r:68},{n:'Walter Schachner',pos:'ST',r:70}
+  ]},
+  {id:'cremonese9192',name:'Cremonese',season:'1991/92',decade:'1990s',tier:'mid',col:'#cc0000',strength:59,predicted:9,players:[
+    {n:'Carlo Giuliani',pos:'GK',r:70},{n:'Paolo Orlandini',pos:'GK',r:62},
+    {n:'Daniele Fortunato',pos:'RB',r:68},{n:'Gianluigi Lentini',pos:'RB',r:74},
+    {n:'Daniele Fortunato',pos:'CB',r:68},{n:'Filippo Galli',pos:'CB',r:74},{n:'Paolo Rossi',pos:'CB',r:66},
+    {n:'Paolo Rossi',pos:'LB',r:66},{n:'Daniele Fortunato',pos:'LWB',r:68},
+    {n:'Chicco Evani',pos:'CDM',r:72},{n:'Ciro Esposito',pos:'CDM',r:68},
+    {n:'Chicco Evani',pos:'CM',r:72},{n:'Ciro Esposito',pos:'CM',r:68},
+    {n:'Gianluigi Lentini',pos:'CAM',r:74},{n:'Chicco Evani',pos:'RAM',r:72},
+    {n:'Gianluigi Lentini',pos:'RW',r:74},{n:'Marco Osio',pos:'LW',r:68},
+    {n:'Claudio Caniggia',pos:'ST',r:80},{n:'Marco Osio',pos:'ST',r:68},{n:'Marco De Marchi',pos:'ST',r:66}
+  ]},
+  {id:'foggia9192',name:'Foggia',season:'1991/92',decade:'1990s',tier:'mid',col:'#cc3300',strength:62,predicted:7,players:[
+    {n:'Giovanni Battista Re',pos:'GK',r:70},{n:'Luca Mondini',pos:'GK',r:62},
+    {n:'Roberto Rambaudi',pos:'RB',r:68},{n:'Sandro Tovalieri',pos:'RB',r:66},
+    {n:'Roberto Pillon',pos:'CB',r:68},{n:'Andrea Silenzi',pos:'CB',r:66},{n:'Beniamino Abate',pos:'CB',r:64},
+    {n:'Beniamino Abate',pos:'LB',r:64},{n:'Roberto Rambaudi',pos:'LWB',r:68},
+    {n:'Sandro Tovalieri',pos:'CDM',r:66},{n:'Marco Nappi',pos:'CDM',r:65},
+    {n:'Roberto Rambaudi',pos:'CM',r:68},{n:'Sandro Tovalieri',pos:'CM',r:66},
+    {n:'Roberto Baggio',pos:'CAM',r:90},{n:'Baiano',pos:'RAM',r:74},
+    {n:'Baiano',pos:'RW',r:74},{n:'Roberto Baggio',pos:'LW',r:90},
+    {n:'Roberto Baggio',pos:'ST',r:90},{n:'Baiano',pos:'ST',r:74},{n:'Andrea Silenzi',pos:'ST',r:66}
+  ]},
+  {id:'piacenza9596',name:'Piacenza',season:'1995/96',decade:'1990s',tier:'mid',col:'#cc0000',strength:60,predicted:9,players:[
+    {n:'Luca Bucci',pos:'GK',r:74},{n:'Marco Ballotta',pos:'GK',r:68},
+    {n:'Filippo Inzaghi',pos:'RB',r:72},{n:'Stefano Eranio',pos:'RB',r:70},
+    {n:'Francesco Colonnese',pos:'CB',r:70},{n:'Adriano Piraccini',pos:'CB',r:66},{n:'Moreno Mannini',pos:'CB',r:72},
+    {n:'Moreno Mannini',pos:'LB',r:72},{n:'Filippo Inzaghi',pos:'LWB',r:72},
+    {n:'Stefano Eranio',pos:'CDM',r:70},{n:'Fabrizio Miccoli',pos:'CDM',r:66},
+    {n:'Stefano Eranio',pos:'CM',r:70},{n:'Adriano Bassetto',pos:'CM',r:66},
+    {n:'Fabrizio Miccoli',pos:'CAM',r:66},{n:'Stefano Eranio',pos:'RAM',r:70},
+    {n:'Stefano Eranio',pos:'RW',r:70},{n:'Roberto Rambaudi',pos:'LW',r:68},
+    {n:'Filippo Inzaghi',pos:'ST',r:72},{n:'Roberto Rambaudi',pos:'ST',r:68},{n:'Marco De Marchi',pos:'ST',r:64}
+  ]},
+  {id:'bologna9697',name:'Bologna',season:'1996/97',decade:'1990s',tier:'mid',col:'#cc3300',strength:63,predicted:7,players:[
+    {n:'Gianluca Pagliuca',pos:'GK',r:82},{n:'Luca Mondini',pos:'GK',r:64},
+    {n:'Ciro Ferrara',pos:'RB',r:80},{n:'Massimo Paganin',pos:'RB',r:70},
+    {n:'Massimo Paganin',pos:'CB',r:70},{n:'Giuseppe Bergomi',pos:'CB',r:78},{n:'Alberigo Evani',pos:'CB',r:68},
+    {n:'Alberigo Evani',pos:'LB',r:68},{n:'Ciro Ferrara',pos:'LWB',r:80},
+    {n:'Roberto Mancini',pos:'CDM',r:82},{n:'Alberigo Evani',pos:'CDM',r:68},
+    {n:'Roberto Mancini',pos:'CM',r:82},{n:'Igor Protti',pos:'CM',r:74},
+    {n:'Roberto Mancini',pos:'CAM',r:82},{n:'Igor Protti',pos:'RAM',r:74},
+    {n:'Igor Protti',pos:'RW',r:74},{n:'Marco De Marchi',pos:'LW',r:66},
+    {n:'Marcello Moderato',pos:'ST',r:72},{n:'Igor Protti',pos:'ST',r:74},{n:'Roberto Mancini',pos:'ST',r:80}
+  ]},
+  {id:'udinese9798',name:'Udinese',season:'1997/98',decade:'1990s',tier:'good',col:'#1a1a1a',strength:72,predicted:4,players:[
+    {n:'Sebastiano Rossi',pos:'GK',r:78},{n:'Albano Bizzarri',pos:'GK',r:66},
+    {n:'Oliver Bierhoff',pos:'RB',r:76},{n:'Gianluigi Lentini',pos:'RB',r:72},
+    {n:'Thomas Helveg',pos:'CB',r:76},{n:'Zvonimir Boban',pos:'CB',r:78},{n:'Francesco Colonnese',pos:'CB',r:72},
+    {n:'Gianluigi Lentini',pos:'LB',r:72},{n:'Thomas Helveg',pos:'LWB',r:76},
+    {n:'Attilio Lombardo',pos:'CDM',r:78},{n:'Giandomenico Mesto',pos:'CDM',r:68},
+    {n:'Attilio Lombardo',pos:'CM',r:78},{n:'Gianluca Zambrotta',pos:'CM',r:78},
+    {n:'Marcio Amoroso',pos:'CAM',r:84},{n:'Marcio Amoroso',pos:'RAM',r:84},
+    {n:'Gianluca Zambrotta',pos:'RW',r:78},{n:'Oliver Bierhoff',pos:'LW',r:76},
+    {n:'Marcio Amoroso',pos:'ST',r:84},{n:'Oliver Bierhoff',pos:'ST',r:76},{n:'Filippo Inzaghi',pos:'ST',r:80}
+  ]},
+  {id:'vicenza9697',name:'Vicenza',season:'1996/97',decade:'1990s',tier:'mid',col:'#cc0000',strength:61,predicted:8,players:[
+    {n:'Marco Ballotta',pos:'GK',r:70},{n:'Luca Mondini',pos:'GK',r:62},
+    {n:'Marco Rossi',pos:'RB',r:66},{n:'Eugenio Corini',pos:'RB',r:70},
+    {n:'Daniele Fortunato',pos:'CB',r:68},{n:'Luigi Sartor',pos:'CB',r:68},{n:'Massimo Briaschi',pos:'CB',r:64},
+    {n:'Massimo Briaschi',pos:'LB',r:64},{n:'Marco Rossi',pos:'LWB',r:66},
+    {n:'Eugenio Corini',pos:'CDM',r:70},{n:'Stefano Bettarini',pos:'CDM',r:66},
+    {n:'Eugenio Corini',pos:'CM',r:70},{n:'Stefano Bettarini',pos:'CM',r:66},
+    {n:'Roberto Baggio',pos:'CAM',r:88},{n:'Eugenio Corini',pos:'RAM',r:70},
+    {n:'Roberto Baggio',pos:'RW',r:88},{n:'Pedro Petrone',pos:'LW',r:72},
+    {n:'Roberto Baggio',pos:'ST',r:88},{n:'Pedro Petrone',pos:'ST',r:72},{n:'Claudio Caniggia',pos:'ST',r:78}
+  ]},
+  {id:'lecce9899',name:'Lecce',season:'1998/99',decade:'1990s',tier:'lower',col:'#cc6600',strength:55,predicted:14,players:[
+    {n:'Luca Castellazzi',pos:'GK',r:68},{n:'Paolo Orlandini',pos:'GK',r:60},
+    {n:'Marco Cassetti',pos:'RB',r:66},{n:'Massimo Piscedda',pos:'RB',r:62},
+    {n:'Marco Cassetti',pos:'CB',r:66},{n:'Pasquale Bruno',pos:'CB',r:70},{n:'Massimo Piscedda',pos:'CB',r:62},
+    {n:'Massimo Piscedda',pos:'LB',r:62},{n:'Marco Cassetti',pos:'LWB',r:66},
+    {n:'Massimo Piscedda',pos:'CDM',r:62},{n:'Cesare Bovo',pos:'CDM',r:64},
+    {n:'Cesare Bovo',pos:'CM',r:64},{n:'Alessandro Budel',pos:'CM',r:62},
+    {n:'Roberto Bonano',pos:'CAM',r:64},{n:'Mirko Vucinic',pos:'CAM',r:68},
+    {n:'Mirko Vucinic',pos:'RW',r:68},{n:'Marco Ferrante',pos:'LW',r:66},
+    {n:'Marco Ferrante',pos:'ST',r:66},{n:'Mirko Vucinic',pos:'ST',r:68},{n:'Cristiano Doni',pos:'ST',r:66}
+  ]},
+  {id:'brescia9697',name:'Brescia',season:'1996/97',decade:'1990s',tier:'mid',col:'#003d8f',strength:60,predicted:10,players:[
+    {n:'Luca Castellazzi',pos:'GK',r:68},{n:'Andrea Campagnolo',pos:'GK',r:62},
+    {n:'Demetrio Albertini',pos:'RB',r:78},{n:'Mauro Bressan',pos:'RB',r:66},
+    {n:'Maurizio Ganz',pos:'CB',r:68},{n:'Luca Castellini',pos:'CB',r:64},{n:'Alessandro Calori',pos:'CB',r:66},
+    {n:'Alessandro Calori',pos:'LB',r:66},{n:'Demetrio Albertini',pos:'LWB',r:78},
+    {n:'Demetrio Albertini',pos:'CDM',r:78},{n:'Mauro Bressan',pos:'CDM',r:66},
+    {n:'Demetrio Albertini',pos:'CM',r:78},{n:'Mauro Bressan',pos:'CM',r:66},
+    {n:'Roberto Baggio',pos:'CAM',r:90},{n:'Roberto Baggio',pos:'RAM',r:90},
+    {n:'Roberto Baggio',pos:'RW',r:90},{n:'Maurizio Ganz',pos:'LW',r:68},
+    {n:'Roberto Baggio',pos:'ST',r:90},{n:'Maurizio Ganz',pos:'ST',r:68},{n:'Daniele Adani',pos:'ST',r:60}
+  ]}
+];
+const TIER_STYLES={
+  elite:{label:'Elite',bg:'#1a4a2e',color:'#fff'},
+  good:{label:'Strong',bg:'#2a6a42',color:'#fff'},
+  mid:{label:'Mid Table',bg:'#8a7030',color:'#fff'},
+  lower:{label:'Lower Half',bg:'#8a3030',color:'#fff'}
+};
+
+const OTHER_CLUBS=['Juventus','AC Milan','Inter Milan','Napoli','AS Roma','SS Lazio','Fiorentina','Atalanta','Sampdoria','Torino','Parma','Udinese','Bologna','Hellas Verona','Genoa','Cagliari','Sassuolo','Lecce','Empoli','Monza'];
+const MY_TEAM='Calcio XI';
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let G={
+  mode:'position',formation:'4-3-3',slots:[],filled:{},
+  showRatings:true,selectedTeam:null,
+  currentSlot:null,chosenPlayer:null,slotOptions:null,
+  spinning:false,respinsLeft:3,recentTeams:[],
+  table:[],schedule:[],matchIdx:0,simRunning:false,simTimer:null,
+  goalscorers:{},predictedPos:null
+};
+
+// ═══════════════════════════════
+// HELPERS
+// ═══════════════════════════════
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));$(id).classList.add('active')}
+function short(n,len=10){const p=n.split(' ');return p.length===1?n.slice(0,len):p[p.length-1].slice(0,len)}
+
+function calcOverall(){
+  const players=Object.values(G.filled);
+  if(!players.length)return{overall:'—',att:'—',mid:'—',def:'—',gk:'—',attPct:0,midPct:0,defPct:0,gkPct:0};
+  const avg=arr=>arr.length?Math.round(arr.reduce((a,b)=>a+b,0)/arr.length):null;
+  const all=players.map(p=>p.r);
+  const att=players.filter((_,i)=>ATT_POS.has(G.slots[Object.keys(G.filled)[Object.values(G.filled).indexOf(_)]].pos)).map(p=>p.r);
+  // rebuild by slot
+  const bySlot={att:[],mid:[],def:[],gk:[]};
+  Object.entries(G.filled).forEach(([i,p])=>{
+    const pos=G.slots[i].pos;
+    if(pos==='GK')bySlot.gk.push(p.r);
+    else if(ATT_POS.has(pos))bySlot.att.push(p.r);
+    else if(MID_POS.has(pos))bySlot.mid.push(p.r);
+    else bySlot.def.push(p.r);
+  });
+  const ov=avg(all)||0,a=avg(bySlot.att),m=avg(bySlot.mid),d=avg(bySlot.def),g=avg(bySlot.gk);
+  const pct=v=>v?Math.round((v-50)/50*100):0;
+  return{overall:ov,att:a||'—',mid:m||'—',def:d||'—',gk:g||'—',attPct:pct(a),midPct:pct(m),defPct:pct(d),gkPct:pct(g)};
+}
+
+function updateOverallBox(){
+  const{overall,att,mid,def,gk,attPct,midPct,defPct,gkPct}=calcOverall();
+  $('ob-rating').textContent=overall;
+  $('ob-att').style.width=Math.max(0,attPct)+'%';$('ob-att-v').textContent=att;
+  $('ob-mid').style.width=Math.max(0,midPct)+'%';$('ob-mid-v').textContent=mid;
+  $('ob-def').style.width=Math.max(0,defPct)+'%';$('ob-def-v').textContent=def;
+  $('ob-gk').style.width=Math.max(0,gkPct)+'%';$('ob-gk-v').textContent=gk;
+  const n=Object.keys(G.filled).length;
+  $('ob-count').textContent=`${n} of ${G.slots.length} players selected`;
+}
+
+// ═══════════════════════════════
+// PITCH SVG
+// ═══════════════════════════════
+function pitchBase(){
+  let s='';
+  for(let i=0;i<7;i++){const y=20+i*(500/7),h=500/7;s+=`<rect x="22" y="${y}" width="336" height="${h}" fill="${i%2?'#1f6040':'#1e5c38'}"/>`}
+  return s+`<rect x="22" y="20" width="336" height="500" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+  <line x1="22" y1="260" x2="358" y2="260" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+  <circle cx="190" cy="260" r="52" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+  <circle cx="190" cy="260" r="2.5" fill="rgba(255,255,255,0.3)"/>
+  <rect x="112" y="20" width="156" height="58" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+  <rect x="112" y="462" width="156" height="58" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+  <rect x="148" y="20" width="84" height="24" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+  <rect x="148" y="496" width="84" height="24" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
+  <circle cx="190" cy="70" r="2.5" fill="rgba(255,255,255,0.3)"/>
+  <circle cx="190" cy="472" r="2.5" fill="rgba(255,255,255,0.3)"/>`;
+}
+
+function drawPitch(svgId){
+  const svg=$(svgId);
+  let h=`<rect width="380" height="540" fill="#1e5c38"/>`;
+  h+=pitchBase();
+  G.slots.forEach((sl,i)=>{
+    const f=G.filled[i],isCur=G.currentSlot===i;
+    if(f){
+      h+=`<g>
+        <circle cx="${sl.x}" cy="${sl.y}" r="24" fill="rgba(255,255,255,0.93)" stroke="white" stroke-width="1.5"/>
+        <text x="${sl.x}" y="${sl.y-7}" text-anchor="middle" fill="#1a4a2e" font-size="7.5" font-weight="700" font-family="Oswald" letter-spacing=".8">${sl.pos}</text>
+        <text x="${sl.x}" y="${sl.y+3}" text-anchor="middle" fill="#111" font-size="8" font-family="Oswald" font-weight="500">${short(f.n,9)}</text>
+        ${G.showRatings?`<text x="${sl.x}" y="${sl.y+13}" text-anchor="middle" fill="#c8922a" font-size="7.5" font-family="Oswald" font-weight="700">${f.r}</text>`:''}
+      </g>`;
+    } else if(isCur){
+      h+=`<g>
+        <circle cx="${sl.x}" cy="${sl.y}" r="24" fill="rgba(200,146,42,0.22)" stroke="#c8922a" stroke-width="2.5"/>
+        <circle cx="${sl.x}" cy="${sl.y}" r="4" fill="#c8922a"/>
+        <text x="${sl.x}" y="${sl.y+33}" text-anchor="middle" fill="#c8922a" font-size="8.5" font-family="Oswald" letter-spacing="1" font-weight="600">${sl.pos}</text>
+      </g>`;
+    } else {
+      h+=`<circle cx="${sl.x}" cy="${sl.y}" r="18" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="${sl.x}" y="${sl.y+4}" text-anchor="middle" fill="rgba(255,255,255,0.35)" font-size="8.5" font-family="Oswald" letter-spacing=".8">${sl.pos}</text>`;
+    }
+  });
+  svg.innerHTML=h;
+}
+
+// ═══════════════════════════════
+// SLOT MACHINE SPINNER
+// ═══════════════════════════════
+const ITEM_H = 40;
+
+function buildSlotItems(list) {
+  // Build a long repeating list for smooth animation (3 loops minimum)
+  const track = $('slot-track');
+  track.innerHTML = '';
+  list.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'slot-item';
+    d.innerHTML = `<div class="slot-dot" style="background:${t.col}"></div>
+      <div class="slot-name">${t.name}</div>
+      <div class="slot-year">${t.season}</div>`;
+    track.appendChild(d);
+  });
+  // position track so middle item is centred in the 108px window (3 items visible)
+  // centre = 54px, item centre = 18px → offset = 54 - 18 = 36
+  track.style.transform = `translateY(${ITEM_H}px)`;
+}
+
+function initSlot() {
+  buildSlotItems(TEAMS);
+  setSlotActive(0);
+}
+
+function setSlotActive(idx) {
+  const items = $('slot-track').querySelectorAll('.slot-item');
+  items.forEach((el, i) => el.classList.toggle('active', i === idx));
+}
+
+// ═══════════════════════════════
+// POSITION-FIRST SPIN — slot machine style
+// ═══════════════════════════════
+$('btn-spin').addEventListener('click', () => {
+  if (G.spinning) return;
+  G.spinning = true;
+  G.chosenPlayer = null; G.currentSlot = null;
+  $('btn-spin').disabled = true;
+  $('btn-lock').classList.remove('on');
+  $('btn-respin').classList.remove('on');
+
+  // Check if any team can fill remaining open slots — avoid stuck state
+  const openPosSet=new Set(G.slots.filter((_,i)=>!G.filled[i]).map(s=>s.pos));
+  function teamCanFillAny(team){
+    const usedNames=new Set(Object.values(G.filled).map(p=>p.n));
+    const seen=new Set();
+    const pool=team.players.filter(p=>{if(seen.has(p.n))return false;seen.add(p.n);return true;})
+      .filter(p=>!usedNames.has(p.n));
+    return pool.some(p=>{
+      const compat=POS_COMPAT[p.pos]||[p.pos];
+      return [...openPosSet].some(op=>compat.includes(op));
+    });
+  }
+
+  // Weighted random — avoid recent teams, avoid teams that can't fill slots
+  const WEIGHTS={elite:2,good:3,mid:3,lower:2};
+  const recentSet=new Set(G.recentTeams.slice(-4));
+  let weightedPool=[];
+  TEAMS.forEach((t,i)=>{
+    if(recentSet.has(t.id))return; // skip recently seen
+    if(!teamCanFillAny(t))return;  // skip teams with no valid picks
+    const w=WEIGHTS[t.tier]||2;
+    for(let j=0;j<w;j++) weightedPool.push(i);
+  });
+  // Fallback: if all excluded, use any team that can fill slots
+  if(!weightedPool.length){
+    TEAMS.forEach((t,i)=>{ if(teamCanFillAny(t)) weightedPool.push(i); });
+  }
+  // Last resort: use any team
+  if(!weightedPool.length){ TEAMS.forEach((_,i)=>weightedPool.push(i)); }
+  const targetIdx = weightedPool[Math.floor(Math.random()*weightedPool.length)];
+  // Track recently seen
+  G.recentTeams.push(TEAMS[targetIdx].id);
+  if(G.recentTeams.length>6) G.recentTeams.shift();
+
+  // Extend the track with extra items to animate through
+  const n = TEAMS.length;
+  // We'll animate through multiple full loops then land on target
+  const loops = 3 + Math.floor(Math.random() * 2); // 3–4 full loops
+  const totalItems = loops * n + targetIdx; // extra items to scroll through
+
+  // Build extended track (loops + 1 more set so target is visible)
+  const track = $('slot-track');
+  track.innerHTML = '';
+  const extList = [];
+  for (let i = 0; i < loops + 1; i++) extList.push(...TEAMS);
+  extList.forEach(t => {
+    const d = document.createElement('div');
+    d.className = 'slot-item';
+    d.innerHTML = `<div class="slot-dot" style="background:${t.col}"></div>
+      <div class="slot-name">${t.name}</div>
+      <div class="slot-year">${t.season}</div>`;
+    track.appendChild(d);
+  });
+
+  // Starting Y: first item centred in window
+  const startY = ITEM_H; // one item offset so we see item above
+  const endY = startY - totalItems * ITEM_H;
+  track.style.transform = `translateY(${startY}px)`;
+
+  const duration = 2800;
+  const t0 = performance.now();
+  let lastIdx = -1;
+
+  function easeOut(t) {
+    // Cubic ease-out — starts fast, decelerates
+    return 1 - Math.pow(1 - t, 3);
+  }
+
+  function step(now) {
+    const elapsed = now - t0;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = easeOut(progress);
+    const currentY = startY + (endY - startY) * eased;
+    track.style.transform = `translateY(${currentY}px)`;
+
+    // Work out which item is currently in the centre
+    const centreOffset = ITEM_H - currentY; // how far we've scrolled from top
+    const centreIdx = Math.round(centreOffset / ITEM_H) % n;
+    const wrappedIdx = ((centreIdx % n) + n) % n;
+    if (wrappedIdx !== lastIdx) {
+      lastIdx = wrappedIdx;
+      // highlight the item currently centred
+      const items = track.querySelectorAll('.slot-item');
+      const centreItemIdx = Math.round((ITEM_H - currentY) / ITEM_H);
+      items.forEach((el, i) => el.classList.toggle('active', i === centreItemIdx));
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    } else {
+      // Snap cleanly to end position
+      track.style.transform = `translateY(${endY}px)`;
+      // Highlight the target
+      const items = track.querySelectorAll('.slot-item');
+      items.forEach((el, i) => el.classList.toggle('active', i === totalItems));
+
+      G.spinning = false;
+      G.selectedTeam = TEAMS[targetIdx];
+      G.predictedPos = G.selectedTeam.predicted;
+      setRightHeader();
+      revealTeam(G.selectedTeam); // show team name strip in spinner panel
+      // brief pause so user sees the landed team, then show players
+      setTimeout(()=>{
+        renderPlayerTable();
+        drawPitch('pitch-svg');
+        // check if this team actually has valid picks — if not, warn
+        const hasValid=$('player-table').querySelector('.pt-row:not(.used)');
+        if(!hasValid&&G.respinsLeft>0){
+          // auto-prompt respin
+          $('rc-eyebrow').textContent='NO VALID PICKS — RE-SPIN?';
+        }
+        showPlayers();
+      }, 600);
+      const rLabel=G.respinsLeft>0?` (${G.respinsLeft})`:'';
+      $('btn-respin').textContent=`↻ RE-SPIN${rLabel}`;
+      if(G.respinsLeft>0)$('btn-respin').classList.add('on');
+    }
+  }
+
+  requestAnimationFrame(step);
+});
+
+// ═══════════════════════════════
+// RE-SPIN — slot machine style for position-first
+// ═══════════════════════════════
+$('btn-respin').addEventListener('click', () => {
+  if (G.respinsLeft <= 0) return;
+  G.respinsLeft--;
+  $('btn-respin').textContent = G.respinsLeft > 0 ? `↻ RE-SPIN (${G.respinsLeft})` : '↻ RE-SPIN';
+  if (G.respinsLeft === 0) { $('btn-respin').classList.remove('on'); }
+  G.chosenPlayer = null; G.currentSlot = null;
+  $('btn-lock').classList.remove('on');
+  document.querySelector('.slot-picker')?.remove();
+
+  if (G.mode === 'position') {
+    // Quick re-spin to a different team (weighted, avoids stuck teams)
+    const WEIGHTS2={elite:2,good:3,mid:3,lower:2};
+    const recentSet2=new Set(G.recentTeams.slice(-4));
+    const openPosSet2=new Set(G.slots.filter((_,i)=>!G.filled[i]).map(s=>s.pos));
+    function teamCanFill2(team){
+      const usedNames=new Set(Object.values(G.filled).map(p=>p.n));
+      const seen=new Set();
+      return team.players.filter(p=>{if(seen.has(p.n))return false;seen.add(p.n);return true;})
+        .filter(p=>!usedNames.has(p.n))
+        .some(p=>{const c=POS_COMPAT[p.pos]||[p.pos];return [...openPosSet2].some(op=>c.includes(op));});
+    }
+    let wp2=[];
+    TEAMS.forEach((t,i)=>{
+      if(t.id===G.selectedTeam?.id||recentSet2.has(t.id))return;
+      if(!teamCanFill2(t))return;
+      const w=WEIGHTS2[t.tier]||2;for(let j=0;j<w;j++)wp2.push(i);
+    });
+    if(!wp2.length) TEAMS.forEach((t,i)=>{if(t.id!==G.selectedTeam?.id&&teamCanFill2(t))wp2.push(i);});
+    if(!wp2.length) TEAMS.forEach((t,i)=>{if(t.id!==G.selectedTeam?.id)wp2.push(i);});
+    let pick=wp2[Math.floor(Math.random()*wp2.length)];
+    if(pick===undefined)pick=0;
+    G.recentTeams.push(TEAMS[pick].id);
+    if(G.recentTeams.length>6)G.recentTeams.shift();
+
+    const track = $('slot-track');
+    const currentY = parseFloat(track.style.transform.replace('translateY(', '')) || ITEM_H;
+    const targetItemsDown = pick < (G.selectedTeam ? TEAMS.indexOf(G.selectedTeam) : 0)
+      ? TEAMS.length + pick : pick;
+
+    // Short fast spin (1 loop + target)
+    const startY = currentY;
+    const endY = startY - (TEAMS.length + pick) * ITEM_H;
+
+    // Rebuild track briefly
+    track.innerHTML = '';
+    const extList = [];
+    for (let i = 0; i < 3; i++) extList.push(...TEAMS);
+    extList.forEach(t => {
+      const d = document.createElement('div');
+      d.className = 'slot-item';
+      d.innerHTML = `<div class="slot-dot" style="background:${t.col}"></div>
+        <div class="slot-name">${t.name}</div>
+        <div class="slot-year">${t.season}</div>`;
+      track.appendChild(d);
+    });
+    track.style.transform = `translateY(${ITEM_H}px)`;
+
+    const totalItems = TEAMS.length + pick;
+    const endYFinal = ITEM_H - totalItems * ITEM_H;
+    const dur = 1200;
+    const t0 = performance.now();
+
+    G.spinning = true;
+    (function step(now) {
+      const p = Math.min((now - t0) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      const y = ITEM_H + (endYFinal - ITEM_H) * ease;
+      track.style.transform = `translateY(${y}px)`;
+      if (p < 1) { requestAnimationFrame(step); }
+      else {
+        track.style.transform = `translateY(${endYFinal}px)`;
+        const items = track.querySelectorAll('.slot-item');
+        items.forEach((el, i) => el.classList.toggle('active', i === totalItems));
+        G.spinning = false;
+        G.selectedTeam = TEAMS[pick];
+        G.predictedPos = G.selectedTeam.predicted;
+        setRightHeader();
+        revealTeam(G.selectedTeam);
+        setTimeout(()=>{
+          renderPlayerTable();
+          drawPitch('pitch-svg');
+          const hasValid=$('player-table').querySelector('.pt-row:not(.used)');
+          if(!hasValid&&G.respinsLeft>0) $('rc-eyebrow').textContent='NO VALID PICKS — RE-SPIN?';
+          showPlayers();
+        }, 600);
+        const rLabel2=G.respinsLeft>0?` (${G.respinsLeft})`:'';
+        $('btn-respin').textContent=`↻ RE-SPIN${rLabel2}`;
+        if(G.respinsLeft>0)$('btn-respin').classList.add('on');
+        else $('btn-respin').classList.remove('on');
+      }
+    })(performance.now());
+  } else {
+    renderPlayerTable();
+    drawPitch('pitch-svg');
+  }
+});
+function setupTog(id,cb){
+  const el=$(id);
+  el.parentElement.addEventListener('click',()=>{const on=el.classList.toggle('on');cb(on);});
+}
+setupTog('rat-tog',on=>{G.showRatings=on;});
+setupTog('rat-tog-d',on=>{G.showRatings=on;drawPitch('pitch-svg');renderPlayerTable();document.querySelectorAll('.pt-rat-num').forEach(el=>{el.classList.toggle('hidden',!on);});});
+
+// ═══════════════════════════════
+// PANEL TOGGLE: spinner ↔ player list
+// ═══════════════════════════════
+function showSpinner(){
+  $('spinner-panel').classList.remove('hidden');
+  $('player-panel').classList.add('hidden');
+  // hide team-revealed strip when showing blank spinner
+  const tr=$('team-revealed');if(tr)tr.classList.add('hidden');
+}
+function showPlayers(){
+  $('spinner-panel').classList.add('hidden');
+  $('player-panel').classList.remove('hidden');
+}
+function revealTeam(team){
+  // show the team strip at the bottom of the spinner panel (before switching to players)
+  const tr=$('team-revealed');
+  if(!tr||!team)return;
+  $('tr-dot').style.background=team.col;
+  $('tr-name').textContent=team.name;
+  $('tr-season').textContent=' · '+team.season;
+  const ts=TIER_STYLES[team.tier]||{label:'',bg:'#666',color:'#fff'};
+  const tier=$('tr-tier');
+  tier.textContent=ts.label;
+  tier.style.background=ts.bg;
+  tier.style.color=ts.color;
+  tr.classList.remove('hidden');
+}
+
+// ═══════════════════════════════
+// INTRO
+// ═══════════════════════════════
+$('mode-grid').addEventListener('click',e=>{
+  const c=e.target.closest('.mode-card');if(!c)return;
+  document.querySelectorAll('.mode-card').forEach(x=>x.classList.remove('sel'));
+  c.classList.add('sel');G.mode=c.dataset.m;checkStart();
+});
+$('formations').addEventListener('click',e=>{
+  const b=e.target.closest('.f-btn');if(!b)return;
+  document.querySelectorAll('.f-btn').forEach(x=>x.classList.remove('sel'));
+  b.classList.add('sel');G.formation=b.dataset.f;checkStart();
+});
+function checkStart(){$('btn-start').classList.toggle('on',!!(G.mode&&G.formation));}
+
+$('btn-start').addEventListener('click',()=>{
+  G.slots=JSON.parse(JSON.stringify(FORMATIONS[G.formation].slots));
+  G.filled={};G.currentSlot=null;G.chosenPlayer=null;G.respinsLeft=3;G.slotOptions=null;
+  G.goalscorers={};G.predictedPos=null;G.selectedTeam=null;
+  $('rat-tog-d').className='tog'+(G.showRatings?' on':'');
+  updateDraftProg();drawPitch('pitch-svg');updateOverallBox();
+  $('player-table').innerHTML='';
+  $('btn-lock').classList.remove('on');$('btn-respin').classList.remove('on');
+
+  if(G.mode==='position'){
+    $('wheel-zone').style.display='';
+    $('team-zone').style.cssText='display:none';
+    $('btn-spin').disabled=false;
+    initSlot();
+    setRightHeader();
+    showSpinner();
+  } else {
+    $('wheel-zone').style.display='none';
+    const tz=$('team-zone');tz.style.cssText='display:flex;flex:1;flex-direction:column;overflow:hidden';
+    buildTeamList('');
+    setRightHeader();
+    showSpinner(); // show team list (inside spinner panel) until team is picked
+  }
+  show('s-draft');
+});
+
+// ═══════════════════════════════
+// TEAM LIST
+// ═══════════════════════════════
+$('era-filter').addEventListener('change',e=>buildTeamList(e.target.value));
+function buildTeamList(dec){
+  const list=$('team-list');list.innerHTML='';
+  (dec?TEAMS.filter(t=>t.decade===dec):TEAMS).forEach(t=>{
+    const ts=TIER_STYLES[t.tier];
+    const d=document.createElement('div');d.className='team-card'+(G.selectedTeam&&G.selectedTeam.id===t.id?' sel':'');
+    d.innerHTML=`<div class="tc-badge" style="background:${t.col}">${t.name.slice(0,3).toUpperCase()}</div>
+      <div class="tc-info"><div class="tc-name">${t.name}</div><div class="tc-season">${t.season}</div></div>
+      <div class="tc-tier" style="background:${ts.bg};color:${ts.color}">${ts.label}</div>`;
+    d.addEventListener('click',()=>{
+      document.querySelectorAll('.team-card').forEach(c=>c.classList.remove('sel'));
+      d.classList.add('sel');
+      G.selectedTeam=t;G.predictedPos=t.predicted;
+      setRightHeader();
+      renderPlayerTable();
+      showPlayers(); // switch from team-list to player panel
+    });
+    list.appendChild(d);
+  });
+}
+
+function ordinal(n){const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0]);}
+
+function setRightHeader(){
+  const t=G.selectedTeam;
+  if(!t){$('rc-eyebrow').textContent='SELECT A TEAM TO BEGIN';$('rc-team-label').textContent='';$('rc-season-label').textContent='';return;}
+  $('rc-eyebrow').textContent='SQUAD SPUN';
+  $('rc-team-label').textContent=t.name;
+  $('rc-season-label').textContent=t.season+' · Predicted: '+ordinal(t.predicted)+' place';
+}
+
+// ─── Position compatibility — more generous to prevent stuck states
+const POS_COMPAT={
+  GK:['GK'],
+  RB:['RB','RWB'],RWB:['RB','RWB'],
+  LB:['LB','LWB'],LWB:['LB','LWB'],
+  CB:['CB','RWB','LWB'],               // CBs can slide into WB roles
+  CM:['CM','CDM','CAM','RAM','LAM','RM','LM'],
+  CDM:['CDM','CM','CB'],               // CDMs can drop to CB
+  CAM:['CAM','RAM','LAM','CM','RW','LW'],
+  RAM:['RAM','CAM','RW','RM','CM'],LAM:['LAM','CAM','LW','LM','CM'],
+  RM:['RM','RW','RAM','CM'],LM:['LM','LW','LAM','CM'],
+  RW:['RW','RAM','RM','ST','CAM'],LW:['LW','LAM','LM','ST','CAM'],
+  ST:['ST','RW','LW','CAM','RAM','LAM']
+};
+
+// Returns list of open slot indices that playerPos is compatible with
+function compatibleSlots(playerPos){
+  const compat=POS_COMPAT[playerPos]||[playerPos];
+  return G.slots.map((_,i)=>i).filter(i=>!G.filled[i]&&compat.includes(G.slots[i].pos));
+}
+
+// Returns list of open slot positions (unique)
+function openPositions(){
+  return [...new Set(G.slots.filter((_,i)=>!G.filled[i]).map(s=>s.pos))];
+}
+
+// ═══════════════════════════════
+// PLAYER TABLE — the heart of the picker
+// Shows the chosen team's FULL squad sorted by rating desc.
+// Each player row shows position badges for their compatible OPEN slots.
+// Rows with zero open compatible slots are greyed/disabled (like 38-0).
+// Clicking a player: if only 1 compatible slot → auto-assign slot, show LOCK button.
+//                    if multiple → show slot-picker badges to select which slot.
+// ═══════════════════════════════
+function renderPlayerTable(){
+  const table=$('player-table');table.innerHTML='';
+  if(!G.selectedTeam){
+    table.innerHTML=`<div style="padding:24px;font-family:var(--serif);font-style:italic;color:var(--text3);font-size:14px;text-align:center">Pick a team from the left to see their squad</div>`;
+    return;
+  }
+
+  const usedNames=new Set(Object.values(G.filled).map(p=>p.n));
+  // Sort by rating desc, deduplicate by name keeping first occurrence
+  const seen=new Set();
+  const pool=G.selectedTeam.players
+    .filter(p=>{if(seen.has(p.n))return false;seen.add(p.n);return true;})
+    .sort((a,b)=>b.r-a.r);
+
+  pool.forEach(p=>{
+    const alreadyUsed=usedNames.has(p.n);
+    const openSlots=compatibleSlots(p.pos);
+    const canPlace=!alreadyUsed&&openSlots.length>0;
+    const isSel=G.chosenPlayer&&G.chosenPlayer.n===p.n;
+
+    const row=document.createElement('div');
+    row.className='pt-row'+(alreadyUsed?' used':canPlace?'':' used')+(isSel?' sel':'');
+
+    // Position colour group — matches 38-0 style: GK=amber, DEF=blue, MID=green, ATT=red
+    const posGroup=(pos)=>{
+      if(pos==='GK') return 'gk';
+      if(['CB','RB','LB','RWB','LWB'].includes(pos)) return 'def';
+      if(['CM','CDM','RM','LM'].includes(pos)) return 'mid';
+      return 'att'; // CAM,RAM,LAM,RW,LW,ST
+    };
+    const posColClass='pos-col-'+posGroup(p.pos);
+
+    // Position badges for compatible open slots — same colour as rating badge
+    let badgeHtml='';
+    if(!alreadyUsed){
+      const openSlotPositions=[...new Set(openSlots.map(i=>G.slots[i].pos))];
+      badgeHtml=openSlotPositions.map(pos=>`<span class="pos-badge ${posColClass}">${pos}</span>`).join('');
+    } else {
+      badgeHtml=`<span class="pos-badge used-badge">✓</span>`;
+    }
+
+    row.innerHTML=`
+      <div class="pt-rat-badge ${posColClass}">
+        <span class="pt-rat-num${G.showRatings?'':' hidden'}">${p.r}</span>
+      </div>
+      <div class="pt-player-info">
+        <div class="pt-name">${p.n}</div>
+        <div class="pt-club">${p.pos}</div>
+      </div>
+      <div class="pt-badges">${badgeHtml}</div>`;
+
+    if(canPlace){
+      row.style.cursor='pointer';
+      row.addEventListener('click',()=>{
+        if(G.chosenPlayer&&G.chosenPlayer.n===p.n){
+          // deselect
+          G.chosenPlayer=null;G.currentSlot=null;
+          $('btn-lock').classList.remove('on');
+          document.querySelectorAll('.pt-row').forEach(r=>r.classList.remove('sel'));
+          clearSlotHighlight();
+          return;
+        }
+        document.querySelectorAll('.pt-row').forEach(r=>r.classList.remove('sel'));
+        row.classList.add('sel');
+        G.chosenPlayer=p;
+        // If exactly 1 compatible slot, auto-select it
+        if(openSlots.length===1){
+          G.currentSlot=openSlots[0];
+          $('btn-lock').classList.add('on');
+          highlightSlot(openSlots[0]);
+        } else {
+          // Multiple compatible slots — highlight them all, wait for user to pick via pitch click or badge click
+          G.currentSlot=null;$('btn-lock').classList.remove('on');
+          highlightSlotOptions(openSlots);
+          showSlotPicker(openSlots);
+        }
+        drawPitch('pitch-svg');
+      });
+    }
+    table.appendChild(row);
+  });
+}
+
+// Highlight the active target slot on the pitch
+function highlightSlot(idx){G.currentSlot=idx;drawPitch('pitch-svg');}
+function clearSlotHighlight(){G.currentSlot=null;drawPitch('pitch-svg');}
+function highlightSlotOptions(slots){G.slotOptions=slots;drawPitch('pitch-svg');}
+
+// Show inline slot selector below the selected row
+function showSlotPicker(openSlots){
+  // Remove any existing picker
+  const old=document.querySelector('.slot-picker');if(old)old.remove();
+  const sel=document.querySelector('.pt-row.sel');if(!sel)return;
+  const picker=document.createElement('div');picker.className='slot-picker';
+  picker.innerHTML='<div class="slot-picker-label">Place into which position?</div>'+
+    openSlots.map(i=>`<button class="slot-pick-btn" data-slot="${i}">${G.slots[i].pos}</button>`).join('');
+  sel.after(picker);
+  picker.querySelectorAll('.slot-pick-btn').forEach(btn=>{
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      G.currentSlot=parseInt(btn.dataset.slot);
+      $('btn-lock').classList.add('on');
+      highlightSlot(G.currentSlot);
+      picker.querySelectorAll('.slot-pick-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+}
+
+// ═══════════════════════════════
+// POSITION-FIRST SPIN
+// Spin picks a random TEAM (not position), then shows that team's squad
+// ═══════════════════════════════
+// LOCK IN
+// ═══════════════════════════════
+$('btn-lock').addEventListener('click',()=>{
+  if(!G.chosenPlayer||G.currentSlot===null)return;
+  document.querySelector('.slot-picker')?.remove();
+  G.filled[G.currentSlot]=G.chosenPlayer;
+  G.currentSlot=null;G.chosenPlayer=null;G.slotOptions=null;
+  $('btn-lock').classList.remove('on');
+  drawPitch('pitch-svg');updateDraftProg();updateOverallBox();
+
+  if(Object.keys(G.filled).length===G.slots.length){setTimeout(goToSquad,400);return;}
+
+  if(G.mode==='position'){
+    // show spinner again for next pick — respins are per game, not per pick
+    const rLabel=G.respinsLeft>0?` (${G.respinsLeft})`:'';
+    $('btn-respin').textContent=`↻ RE-SPIN${rLabel}`;
+    if(G.respinsLeft>0)$('btn-respin').classList.add('on');
+    else $('btn-respin').classList.remove('on');
+    $('btn-spin').disabled=false;
+    G.selectedTeam=null;
+    setRightHeader();
+    showSpinner();
+    initSlot();
+  } else {
+    // squad-first: stay on player panel, show spinner so user can pick another player
+    showSpinner(); // go back to team list briefly? No — stay with players
+    // actually for squad-first we want to stay in player view
+    showPlayers();
+  }
+  // re-render the table so used players grey out
+  renderPlayerTable();
+});
+function updateDraftProg(){const el=$('draft-prog');if(el)el.textContent=`${Object.keys(G.filled).length} / ${G.slots.length}`;}
+
+// ═══════════════════════════════
+// SQUAD SCREEN
+// ═══════════════════════════════
+function goToSquad(){
+  const{overall,att,mid,def,gk}=calcOverall();
+  $('squad-sub').textContent=G.formation+(G.selectedTeam?` · Based on ${G.selectedTeam.name} ${G.selectedTeam.season}`:'');
+  $('squad-overall-box').innerHTML=`
+    <div style="font-size:9px;letter-spacing:4px;color:var(--text3);margin-bottom:8px;font-weight:600">SQUAD RATING</div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div style="font-size:40px;font-weight:700;color:var(--green)">${overall}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:2px"><span>ATT</span><span style="color:var(--text2);font-weight:700">${att}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:2px"><span>MID</span><span style="color:var(--text2);font-weight:700">${mid}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:2px"><span>DEF</span><span style="color:var(--text2);font-weight:700">${def}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)"><span>GK</span><span style="color:var(--text2);font-weight:700">${gk}</span></div>
+      </div>
+    </div>
+    ${G.predictedPos?`<div style="margin-top:8px;font-size:10px;letter-spacing:2px;color:var(--text3)">PREDICTED FINISH: <span style="color:var(--gold);font-weight:700">${ordinal(G.predictedPos)}</span></div>`:''}`;
+  drawPitch('squad-svg');
+  const roster=$('squad-roster');roster.innerHTML='';
+  G.slots.forEach((sl,i)=>{
+    const p=G.filled[i];if(!p)return;
+    const d=document.createElement('div');d.className='r-item';
+    d.innerHTML=`<div class="r-pos">${sl.pos}</div>
+      <div style="flex:1;min-width:0"><div class="r-name">${p.n}</div><div class="r-club">${p.c||p.team||''}</div></div>
+      <div class="r-rat">${G.showRatings?p.r:''}</div>`;
+    roster.appendChild(d);
+  });
+  show('s-squad');
+}
+$('btn-simulate').addEventListener('click',startSeason);
+$('btn-reset-squad').addEventListener('click',resetAll);
+
+// ═══════════════════════════════
+// SEASON SIM
+// ═══════════════════════════════
+function myStrength(){
+  const vals=Object.values(G.filled).map(p=>p.r);
+  const a=vals.reduce((x,y)=>x+y,0)/vals.length;
+  // Calibrated: strong squads challenge but top clubs are tough
+  if(a>=90) return Math.round(88+(a-90)*1.4);  // 90→88, 95→95
+  if(a>=80) return Math.round(74+(a-80)*1.4);  // 80→74, 85→81, 88→85
+  if(a>=70) return Math.round(60+(a-70)*1.4);  // 70→60, 75→67, 78→71
+  return Math.round(50+(a-65)*2.0);            // 65→50, 68→56
+}
+function clubStr(name){
+  // Top clubs are strong — user needs a good team to beat them consistently
+  const m={
+    Juventus:82,'AC Milan':80,'Inter Milan':81,Napoli:78,'AS Roma':74,
+    'SS Lazio':72,Fiorentina:70,Atalanta:72,Sampdoria:62,Torino:60,
+    Parma:63,Udinese:58,Bologna:57,'Hellas Verona':56,Genoa:54,
+    Cagliari:53,Sassuolo:63,Lecce:52,Empoli:53,Monza:58
+  };
+  return m[name]||57;
+}
+function poisson(l){let L=Math.exp(-Math.max(0,l)),k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
+
+function buildTable(){
+  G.table=[{name:MY_TEAM,w:0,d:0,l:0,gf:0,ga:0,pts:0,isUs:true}];
+  OTHER_CLUBS.forEach(c=>G.table.push({name:c,w:0,d:0,l:0,gf:0,ga:0,pts:0,isUs:false}));
+  // Pre-build full round-robin for other clubs, split into 38 matchday buckets
+  const allPairs=[];
+  for(let i=0;i<OTHER_CLUBS.length;i++)
+    for(let j=0;j<OTHER_CLUBS.length;j++)
+      if(i!==j) allPairs.push([OTHER_CLUBS[i],OTHER_CLUBS[j]]);
+  allPairs.sort(()=>Math.random()-.5);
+  const perGW=Math.floor(allPairs.length/38);
+  G.otherMatchdays=[];
+  for(let gw=0;gw<38;gw++)
+    G.otherMatchdays.push(allPairs.slice(gw*perGW,(gw+1)*perGW));
+}
+function buildSchedule(){
+  const s=[];
+  const a=[...OTHER_CLUBS].sort(()=>Math.random()-.5);
+  const b=[...OTHER_CLUBS].sort(()=>Math.random()-.5);
+  for(let i=0;i<19;i++)s.push({gw:i+1,home:true,opp:a[i],scored:null,conceded:null,result:null,ourScorers:[],theirScorers:[]});
+  for(let i=0;i<19;i++)s.push({gw:i+20,home:false,opp:b[i],scored:null,conceded:null,result:null,ourScorers:[],theirScorers:[]});
+  G.schedule=s;
+}
+
+function getAttackers(){
+  const att=[];
+  Object.entries(G.filled).forEach(([i,p])=>{
+    const pos=G.slots[i].pos;
+    if(ATT_POS.has(pos)||pos==='ST')att.push({...p,weight:ATT_POS.has(pos)?3:1});
+    else if(MID_POS.has(pos))att.push({...p,weight:1});
+  });
+  return att.length?att:Object.values(G.filled).map(p=>({...p,weight:1}));
+}
+function pickScorer(){
+  const pool=getAttackers();
+  const total=pool.reduce((a,p)=>a+p.weight,0);
+  let r=Math.random()*total;
+  for(const p of pool){r-=p.weight;if(r<=0)return p.n;}
+  return pool[pool.length-1].n;
+}
+
+function simGW(idx){
+  const gw=G.schedule[idx];
+  const ms=myStrength(),cs=clubStr(gw.opp);
+  const e1=Math.pow(ms,2.2)*(gw.home?1.10:0.93);
+  const e2=Math.pow(cs,2.2)*(gw.home?0.93:1.10);
+  const t=e1+e2;
+  const ours=poisson(e1/t*4.2),theirs=poisson(e2/t*3.6);
+  gw.scored=ours;gw.conceded=theirs;
+  gw.result=ours>theirs?'W':ours<theirs?'L':'D';
+  for(let i=0;i<ours;i++){const s=pickScorer();gw.ourScorers.push(s);G.goalscorers[s]=(G.goalscorers[s]||0)+1;}
+  const us=G.table.find(t=>t.isUs);
+  if(gw.result==='W'){us.w++;us.pts+=3;}else if(gw.result==='D'){us.d++;us.pts++;}else us.l++;
+  us.gf+=ours;us.ga+=theirs;
+  const them=G.table.find(t=>t.name===gw.opp);
+  if(them){const tr=gw.result==='W'?'L':gw.result==='L'?'W':'D';
+    if(tr==='W'){them.w++;them.pts+=3;}else if(tr==='D'){them.d++;them.pts++;}else them.l++;
+    them.gf+=theirs;them.ga+=ours;}
+  simOther(idx);sortTable();
+}
+function simOther(idx){
+  // Simulate ALL other-club fixtures for this matchday from pre-built schedule
+  (G.otherMatchdays&&G.otherMatchdays[idx]||[]).forEach(([hc,ac])=>{
+    const hs=clubStr(hc),as=clubStr(ac);
+    const e1=Math.pow(hs,2.2)*1.10,e2=Math.pow(as,2.2)*0.93,t=e1+e2;
+    const hg=poisson(e1/t*4.2),ag=poisson(e2/t*3.6);
+    const ht=G.table.find(r=>r.name===hc),at=G.table.find(r=>r.name===ac);
+    if(!ht||!at)return;
+    ht.gf+=hg;ht.ga+=ag;at.gf+=ag;at.ga+=hg;
+    if(hg>ag){ht.w++;ht.pts+=3;at.l++;}
+    else if(hg===ag){ht.d++;ht.pts++;at.d++;at.pts++;}
+    else{at.w++;at.pts+=3;ht.l++;}
+  });
+}
+function sortTable(){G.table.sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);}
+
+function startSeason(){
+  buildTable();buildSchedule();G.matchIdx=0;G.simRunning=true;G.goalscorers={};
+  $('season-year').textContent='2024/25';
+  $('matches-col').innerHTML='';renderTable();
+  for(let gw=1;gw<=38;gw++){
+    const b=document.createElement('div');b.className='gw-block';b.id=`gw-${gw}`;
+    b.innerHTML=`<div class="gw-label">MATCHDAY ${gw}</div>`;
+    $('matches-col').appendChild(b);
+  }
+  show('s-season');schedNext();
+}
+function getSpeed(){return parseInt($('speed-sel').value)||420;}
+function updateMobSimBar(){
+  const pct=Math.round(G.matchIdx/38*100);
+  const fill=$('mob-sim-fill');if(fill)fill.style.width=pct+'%';
+  const lbl=$('mob-sim-label');if(lbl)lbl.textContent=`Matchday ${G.matchIdx} of 38`;
+}
+function schedNext(){
+  if(!G.simRunning)return;
+  if(G.matchIdx>=38){setTimeout(showResult,700);return;}
+  G.simTimer=setTimeout(()=>{simGW(G.matchIdx);renderMatchRow(G.matchIdx);renderTable();G.matchIdx++;updateMobSimBar();schedNext();},getSpeed());
+}
+
+function skipToEnd(){
+  if(G.simTimer)clearTimeout(G.simTimer);G.simRunning=false;
+  for(let i=G.matchIdx;i<38;i++){simGW(i);renderMatchRow(i);}
+  renderTable();updateMobSimBar();setTimeout(showResult,600);
+}
+$('btn-skip').addEventListener('click',skipToEnd);
+$('btn-skip-mob').addEventListener('click',skipToEnd);
+
+// Restart from any screen
+document.getElementById('btn-restart').addEventListener('click',resetAll);
+
+function renderMatchRow(idx){
+  const gw=G.schedule[idx];
+  const block=$(`gw-${gw.gw}`);if(!block)return;
+  const ht=gw.home?MY_TEAM:gw.opp,at=gw.home?gw.opp:MY_TEAM;
+  const cls=gw.result==='W'?'win':gw.result==='L'?'loss':'draw';
+  const score=gw.home?`${gw.scored}–${gw.conceded}`:`${gw.conceded}–${gw.scored}`;
+  // scorers line for our matches
+  const scorerLine=gw.ourScorers.length?gw.ourScorers.map(s=>short(s,12)).join(', '):'';
+  const row=document.createElement('div');row.className='match-row';
+  row.innerHTML=`<div class="match-home${ht===MY_TEAM?' us':''}">${ht}</div>
+    <div class="match-score ${cls}">
+      <div>${score}</div>
+      ${scorerLine?`<div class="match-scorers">${scorerLine}</div>`:''}
+    </div>
+    <div class="match-away${at===MY_TEAM?' us':''}">${at}</div>`;
+  block.appendChild(row);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>row.classList.add('shown')));
+  row.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function renderTable(){
+  const body=$('lt-body');body.innerHTML='';
+  G.table.forEach((t,i)=>{
+    const d=document.createElement('div');
+    d.className='lt-row'+(t.isUs?' us':'')+(i===0?' champion':'');
+    d.innerHTML=`<div class="lt-pos">${i+1}</div><div class="lt-name${t.isUs?' us':''}">${t.name}</div>
+      <div class="lt-num">${t.w}</div><div class="lt-num">${t.d}</div><div class="lt-num">${t.l}</div>
+      <div class="lt-pts">${t.pts}</div>`;
+    body.appendChild(d);
+  });
+}
+// ═══════════════════════════════
+// RESULT
+// ═══════════════════════════════
+function showResult(){
+  const us=G.table.find(t=>t.isUs);
+  const pos=G.table.findIndex(t=>t.isUs)+1;
+  const{w:W,d:D,l:L,pts,gf,ga}=us;
+  let trophy,record,tagline,msg;
+
+  if(L===0&&D===0){trophy='🏆';record=`${W}-${D}-${L}`;tagline='A perfect season. Utterly invincible.';
+    msg='Thirty-eight games. Thirty-eight wins. Not a single point dropped. This is the greatest campaign in the history of Italian football.';}
+  else if(pos===1&&L===0){trophy='🏆';record=`${W}-${D}-${L}`;tagline='Unbeaten champions — magnifico!';
+    msg=`The Scudetto secured without a single defeat. ${D} draw${D!==1?'s':''} along the way, but no one came close to beating this side. A remarkable achievement.`;}
+  else if(pos===1&&L<=3){trophy='🏆';record=`${W}-${D}-${L}`;tagline='Scudetto! Champions of Italy.';
+    msg=`Champions with ${pts} points. A few bumps in the road, but the quality in this squad was undeniable from start to finish. The title was never truly in doubt.`;}
+  else if(pos===1){trophy='🥇';record=`${W}-${D}-${L}`;tagline='Champions — but it was a battle.';
+    msg=`The Scudetto is yours, just. ${L} defeat${L!==1?'s':''} kept the nerves jangling, but ${pts} points was enough. Champions are champions.`;}
+  else if(pos===2){trophy='🥈';record=`${W}-${D}-${L}`;tagline='Runners-up. So close.';
+    msg=`Second place with ${pts} points. The title slipped away, but a Champions League spot is secured. There will be another chance next season.`;}
+  else if(pos<=4){trophy='🥉';record=`${W}-${D}-${L}`;tagline=`${ordinal(pos)} place. Champions League secured.`;
+    msg=`${ordinal(pos)} place and ${pts} points earns a Champions League spot. Not the title challenge hoped for, but a solid campaign overall.`;}
+  else if(pos<=7){trophy='😤';record=`${W}-${D}-${L}`;tagline=`${ordinal(pos)} place. Europa League.`;
+    msg=`${pts} points and a ${ordinal(pos)}-place finish. Europa League football is the reward, but the squad was capable of much more. A season of missed opportunities.`;}
+  else if(pos<=12){trophy='😔';record=`${W}-${D}-${L}`;tagline=`${ordinal(pos)} place. Disappointing.`;
+    msg=`${ordinal(pos)} place with ${pts} points. Given the talent assembled, this is a significant underperformance. The board will want answers in the summer.`;}
+  else{trophy='😬';record=`${W}-${D}-${L}`;tagline=`${ordinal(pos)} place. A disaster.`;
+    msg=`${ordinal(pos)} place and just ${pts} points. A humiliating campaign for a squad of this calibre. Heads will roll.`;}
+
+  $('res-trophy').textContent=trophy;
+  $('res-record').textContent=record;
+  $('res-tagline').textContent=tagline;
+  $('res-stats').innerHTML=`
+    <div class="res-stat"><div class="res-stat-n">${pts}</div><div class="res-stat-l">POINTS</div></div>
+    <div class="res-stat"><div class="res-stat-n">${W}</div><div class="res-stat-l">WINS</div></div>
+    <div class="res-stat"><div class="res-stat-n">${D}</div><div class="res-stat-l">DRAWS</div></div>
+    <div class="res-stat"><div class="res-stat-n">${L}</div><div class="res-stat-l">LOSSES</div></div>
+    <div class="res-stat"><div class="res-stat-n">${gf}</div><div class="res-stat-l">GOALS FOR</div></div>`;
+
+  // Build 3-card result body
+  // Card 1: position comparison
+  const predPos=G.predictedPos;
+  let posCard=`<div class="res-card"><div class="res-card-title">FINAL POSITION</div>`;
+  if(predPos){
+    const diff=predPos-pos;
+    const arrow=diff>0?'▲':diff<0?'▼':'=';
+    const arrowCol=diff>0?'#2e7d32':diff<0?'#c62828':'#5a5040';
+    posCard+=`<div class="pos-compare">
+      <div class="pos-block"><div class="pos-num" style="color:var(--green)">${pos}</div><div class="pos-lbl">ACTUAL</div></div>
+      <div class="pos-arrow" style="color:${arrowCol}">${arrow}</div>
+      <div class="pos-block"><div class="pos-num" style="color:var(--text3)">${predPos}</div><div class="pos-lbl">PREDICTED</div></div>
+    </div>
+    <div style="font-size:11px;font-family:var(--serif);font-style:italic;color:var(--text2);text-align:center">${diff>0?`Finished ${diff} place${diff!==1?'s':''} higher than predicted — impressive.`:diff<0?`Finished ${Math.abs(diff)} place${Math.abs(diff)!==1?'s':''} below prediction — disappointing.`:'Finished exactly as predicted.'}</div>`;
+  } else {
+    posCard+=`<div class="pos-compare"><div class="pos-block"><div class="pos-num" style="color:var(--green)">${pos}</div><div class="pos-lbl">FINAL POSITION</div></div></div>`;
+  }
+  posCard+=`</div>`;
+
+  // Card 2: top scorers
+  const scorers=Object.entries(G.goalscorers).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  let scorerCard=`<div class="res-card"><div class="res-card-title">TOP SCORERS</div>`;
+  if(scorers.length){
+    scorers.forEach(([name,goals])=>{
+      scorerCard+=`<div class="scorer-row"><div class="scorer-goals">${goals}</div><div class="scorer-name">${name}</div></div>`;
+    });
+  } else scorerCard+=`<div style="font-family:var(--serif);font-style:italic;color:var(--text3);font-size:13px">No goals scored</div>`;
+  scorerCard+=`</div>`;
+
+  // Card 3: squad
+  let squadCard=`<div class="res-card"><div class="res-card-title">YOUR CALCIO XI</div>`;
+  G.slots.forEach((sl,i)=>{
+    const p=G.filled[i];if(!p)return;
+    squadCard+=`<div class="res-player"><div class="res-player-pos">${sl.pos}</div><div class="res-player-name">${p.n}</div>${G.showRatings?`<div class="res-player-rat">${p.r}</div>`:''}</div>`;
+  });
+  squadCard+=`</div>`;
+
+  $('res-body').innerHTML=posCard+scorerCard+squadCard;
+  $('res-msg').textContent=msg;
+
+  show('s-result');
+  if(L===0&&D===0)confetti();
+}
+
+// ═══════════════════════════════
+// CONFETTI
+// ═══════════════════════════════
+function confetti(){
+  const cv=$('confetti-canvas');cv.width=innerWidth;cv.height=innerHeight;
+  const cx=cv.getContext('2d');
+  const cols=['#c8922a','#f5d97a','#fff8dc','#1a4a2e','#ffffff','#e8c96d'];
+  const ps=Array.from({length:230},()=>({x:Math.random()*cv.width,y:-30-Math.random()*200,w:5+Math.random()*9,h:3+Math.random()*5,rot:Math.random()*360,rv:(Math.random()-.5)*8,vx:(Math.random()-.5)*3,vy:2.5+Math.random()*4,col:cols[Math.floor(Math.random()*cols.length)],a:1}));
+  let f=0;(function tick(){cx.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.rv;if(f>160)p.a=Math.max(0,p.a-.012);cx.save();cx.translate(p.x,p.y);cx.rotate(p.rot*Math.PI/180);cx.globalAlpha=p.a;cx.fillStyle=p.col;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore();});f++;if(f<320)requestAnimationFrame(tick);else cx.clearRect(0,0,cv.width,cv.height);})();
+}
+
+// ═══════════════════════════════
+// DARK MODE
+// ═══════════════════════════════
+let darkMode = false;
+function toggleDark(){
+  darkMode=!darkMode;
+  document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : '');
+  const icon = darkMode ? '☀️' : '🌙';
+  document.querySelectorAll('.dm-btn').forEach(b => b.textContent = icon);
+}
+document.querySelectorAll('.dm-btn').forEach(b => b.addEventListener('click', toggleDark));
+
+// ═══════════════════════════════
+// SHARE / SAVE IMAGE
+// ═══════════════════════════════
+function buildShareCanvas(cb){
+  const dark = darkMode;
+  const bg = dark ? '#0f1117' : '#f2efe8';
+  const card = dark ? '#1c2030' : '#ffffff';
+  const green = dark ? '#3a9a58' : '#1a4a2e';
+  const text = dark ? '#e8e4dc' : '#1a1714';
+  const text2 = dark ? '#9a9488' : '#5a5040';
+  const text3 = dark ? '#5a5a6a' : '#9a9080';
+  const gold = '#c8922a';
+  const border = dark ? '#242836' : '#d8d2c6';
+
+  const us = G.table.find(t => t.isUs);
+  const pos = G.table.findIndex(t => t.isUs) + 1;
+  const { w:W, d:D, l:L, pts } = us;
+  const scorers = Object.entries(G.goalscorers).sort((a,b) => b[1]-a[1]).slice(0, 5);
+  const record = `${W}-${D}-${L}`;
+
+  const W_PX = 600, H_PX = 700;
+  const cv = $('share-canvas');
+  cv.width = W_PX; cv.height = H_PX;
+  const cx = cv.getContext('2d');
+
+  // Background
+  cx.fillStyle = bg;
+  cx.fillRect(0, 0, W_PX, H_PX);
+
+  // Top stripe
+  cx.fillStyle = green;
+  cx.fillRect(0, 0, W_PX, 6);
+
+  // Header
+  cx.fillStyle = gold;
+  cx.font = 'bold 11px Oswald, sans-serif';
+  cx.letterSpacing = '6px';
+  cx.fillText('CALCIO XI', 40, 50);
+
+  cx.fillStyle = text;
+  cx.font = 'bold 52px Oswald, sans-serif';
+  cx.letterSpacing = '0px';
+  cx.fillText(record, 40, 115);
+
+  cx.fillStyle = text2;
+  cx.font = 'italic 18px Georgia, serif';
+  const trophy = pos===1&&L===0&&D===0?'🏆':pos===1?'🏆':pos<=4?'🥈':'⚽';
+  const tagline = pos===1&&L===0&&D===0?'Perfect season — utterly invincible':pos===1?'Scudetto! Champions of Italy':pos<=4?`${ordinal(pos)} place — Champions League`:pos<=7?`${ordinal(pos)} place — Europa League`:`${ordinal(pos)} place`;
+  cx.fillText(tagline, 40, 150);
+
+  // Divider
+  cx.fillStyle = gold;
+  cx.fillRect(40, 168, 520, 2);
+
+  // Stats row
+  const stats = [{l:'POINTS',v:pts},{l:'WINS',v:W},{l:'DRAWS',v:D},{l:'LOSSES',v:L}];
+  stats.forEach((s,i) => {
+    const x = 40 + i * 130;
+    cx.fillStyle = green;
+    cx.font = 'bold 34px Oswald, sans-serif';
+    cx.fillText(s.v, x, 215);
+    cx.fillStyle = text3;
+    cx.font = '10px Oswald, sans-serif';
+    cx.letterSpacing = '2px';
+    cx.fillText(s.l, x, 232);
+    cx.letterSpacing = '0px';
+  });
+
+  // Squad + scorers columns
+  const colW = 260;
+
+  // Squad header
+  cx.fillStyle = text3;
+  cx.font = '9px Oswald, sans-serif';
+  cx.letterSpacing = '3px';
+  cx.fillText('YOUR CALCIO XI', 40, 268);
+  cx.fillText('TOP SCORERS', 320, 268);
+  cx.letterSpacing = '0px';
+  cx.fillStyle = border;
+  cx.fillRect(40, 274, 520, 1);
+
+  // Squad list
+  let y = 296;
+  G.slots.forEach((sl, i) => {
+    const p = G.filled[i]; if (!p) return;
+    cx.fillStyle = gold;
+    cx.font = 'bold 9px Oswald, sans-serif';
+    cx.letterSpacing = '1px';
+    cx.fillText(sl.pos, 40, y);
+    cx.letterSpacing = '0px';
+    cx.fillStyle = text;
+    cx.font = '13px Oswald, sans-serif';
+    cx.fillText(p.n.length > 22 ? p.n.slice(0,21)+'…' : p.n, 74, y);
+    if (G.showRatings) {
+      cx.fillStyle = green;
+      cx.font = 'bold 12px Oswald, sans-serif';
+      cx.fillText(p.r, 256, y);
+    }
+    cx.fillStyle = border;
+    cx.fillRect(40, y + 4, 240, 1);
+    y += 20;
+  });
+
+  // Scorers list
+  let sy = 296;
+  scorers.forEach(([name, goals]) => {
+    cx.fillStyle = green;
+    cx.font = 'bold 18px Oswald, sans-serif';
+    cx.fillText(goals, 320, sy);
+    cx.fillStyle = text;
+    cx.font = '13px Oswald, sans-serif';
+    cx.fillText(name.length > 20 ? name.slice(0,19)+'…' : name, 348, sy);
+    cx.fillStyle = border;
+    cx.fillRect(320, sy + 4, 240, 1);
+    sy += 28;
+  });
+
+  // Footer
+  cx.fillStyle = text3;
+  cx.font = '10px Oswald, sans-serif';
+  cx.letterSpacing = '2px';
+  cx.fillText('calcio-xi.app', 40, H_PX - 28);
+  cx.letterSpacing = '0px';
+  cx.fillStyle = green;
+  cx.fillRect(0, H_PX - 6, W_PX, 6);
+
+  if (cb) cb(cv);
+}
+
+$('btn-save').addEventListener('click', () => {
+  buildShareCanvas(cv => {
+    const a = document.createElement('a');
+    a.download = 'calcio-xi-result.png';
+    a.href = cv.toDataURL('image/png');
+    a.click();
+  });
+});
+
+$('btn-share').addEventListener('click', () => {
+  buildShareCanvas(async cv => {
+    cv.toBlob(async blob => {
+      const text = `My Calcio XI season: ${G.table.find(t=>t.isUs).pts} pts, ${ordinal(G.table.findIndex(t=>t.isUs)+1)} place! #CalcioXI`;
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob],'calcio-xi.png',{type:'image/png'})] })) {
+        try {
+          await navigator.share({ files: [new File([blob],'calcio-xi.png',{type:'image/png'})], title: 'Calcio XI', text });
+          return;
+        } catch(e) {}
+      }
+      // Fallback: copy text to clipboard
+      try {
+        await navigator.clipboard.writeText(text);
+        $('btn-share').textContent = '✓ COPIED!';
+        setTimeout(() => { $('btn-share').innerHTML = '📤 SHARE RESULT'; }, 2000);
+      } catch(e) {
+        // Last fallback: download image
+        const a = document.createElement('a');
+        a.download = 'calcio-xi-result.png';
+        a.href = cv.toDataURL('image/png');
+        a.click();
+      }
+    }, 'image/png');
+  });
+});
+
+// ═══════════════════════════════
+// RESET
+// ═══════════════════════════════
+function resetAll(){
+  if(G.simTimer)clearTimeout(G.simTimer);
+  G={mode:'position',formation:'4-3-3',slots:[],filled:{},showRatings:true,selectedTeam:null,currentSlot:null,chosenPlayer:null,slotOptions:null,spinning:false,respinsLeft:3,recentTeams:[],table:[],schedule:[],matchIdx:0,simRunning:false,simTimer:null,goalscorers:{},predictedPos:null};
+  document.querySelectorAll('.f-btn,.mode-card').forEach(b=>b.classList.remove('sel'));
+  $('btn-start').classList.remove('on');
+  $('rat-tog').classList.add('on');
+  initSlot();show('s-intro');
+}
+$('btn-again').addEventListener('click',resetAll);
+
+</script>
+</body>
+</html>
