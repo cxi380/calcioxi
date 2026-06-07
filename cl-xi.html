@@ -1235,21 +1235,22 @@ function myStr(){
 }
 function poisson(l){let L=Math.exp(-Math.max(0,l)),k=0,p=1;do{k++;p*=Math.random();}while(p>L);return k-1;}
 function simMatch(s1,s2){
-  const e1=Math.pow(s1,2.2)*1.08,e2=Math.pow(s2,2.2)*0.94,t=e1+e2;
-  return[poisson(e1/t*3.6),poisson(e2/t*3.0)];
+  // s1 is home, s2 is away — realistic home advantage
+  const e1=Math.pow(s1,1.8)*1.06,e2=Math.pow(s2,1.8)*0.95,t=e1+e2;
+  return[poisson(e1/t*2.4),poisson(e2/t*2.1)];
 }
 function simMatchNeutral(s1,s2){
-  const e1=Math.pow(s1,2.2),e2=Math.pow(s2,2.2),t=e1+e2;
-  return[poisson(e1/t*3.4),poisson(e2/t*3.0)];
+  const e1=Math.pow(s1,1.8),e2=Math.pow(s2,1.8),t=e1+e2;
+  return[poisson(e1/t*2.3),poisson(e2/t*2.1)];
 }
 function simKOTwoLegs(s1,s2){
-  // s1 is first leg away, second leg home
-  const[g1a,g1b]=simMatch(s2,s1); // s2 home first leg
-  const[g2a,g2b]=simMatch(s1,s2); // s1 home second leg
-  const tot1=g1b+g2a,tot2=g1a+g2b;
-  let win1=tot1>tot2,win2=tot2>tot1;
-  if(tot1===tot2)win1=Math.random()>0.5,win2=!win1;
-  return{win1,score:`${tot1}–${tot2}`,pens:tot1===tot2};
+  // Two-leg tie — s1 plays away first, home second
+  const[g1,g2]=simMatch(s2,s1); // first leg: s2 home
+  const[g3,g4]=simMatch(s1,s2); // second leg: s1 home
+  const tot1=g2+g3,tot2=g1+g4; // s1's total, s2's total
+  let win1=tot1>tot2;
+  if(tot1===tot2)win1=Math.random()>0.5; // pens
+  return{win1,score:`${tot1}–${tot2}`,leg1:`${g1}–${g2}`,leg2:`${g3}–${g4}`,pens:tot1===tot2};
 }
 function getAttackers(){
   const att=[];
@@ -1309,67 +1310,52 @@ function getUserGroupResult(){
 // ═══ NEW FORMAT: 36 team league phase ═══
 function buildLeaguePhase(){
   const clubs=[...CL_CLUBS_LEAGUE].sort(()=>Math.random()-.5);
-  clubs.pop();clubs.push(MY_TEAM);
-  // Reset all rows to 0
+  // Replace one with MY_TEAM
+  clubs[35]=MY_TEAM;
   G.leagueRows=clubs.map(n=>({name:n,w:0,d:0,l:0,gf:0,ga:0,pts:0,isUs:n===MY_TEAM}));
   G.leagueMatches=[];
-  const n=G.leagueRows.length;
 
-  // Build opponent maps — each team plays 8 different opponents
-  const oppsMap={};
-  G.leagueRows.forEach((_,i)=>{
-    oppsMap[i]=[...Array(n).keys()].filter(j=>j!==i).sort(()=>Math.random()-.5).slice(0,8);
-  });
+  // Pick exactly 8 opponents for the user (no duplicates)
+  const others=clubs.filter(n=>n!==MY_TEAM);
+  const userOpponents=others.sort(()=>Math.random()-.5).slice(0,8);
 
-  // Simulate ALL non-user matches upfront (background)
-  const usIdx=G.leagueRows.findIndex(r=>r.isUs);
-  const played=new Set();
-  G.leagueRows.forEach((_,i)=>{
-    if(i===usIdx)return; // skip user's matches — handled separately
-    (oppsMap[i]||[]).forEach(j=>{
-      if(j===usIdx)return; // skip user's matches
-      const key=[Math.min(i,j),Math.max(i,j)].join('-');
-      if(played.has(key))return;played.add(key);
-      const t1=G.leagueRows[i],t2=G.leagueRows[j];
-      const[g1,g2]=simMatchNeutral(clStr(t1.name),clStr(t2.name));
-      if(g1>g2){t1.w++;t1.pts+=3;t2.l++;}else if(g1===g2){t1.d++;t1.pts++;t2.d++;t2.pts++;}else{t2.w++;t2.pts+=3;t1.l++;}
-      t1.gf+=g1;t1.ga+=g2;t2.gf+=g2;t2.ga+=g1;
+  // Simulate background: all other clubs play 8 games each vs random non-user opponents
+  // This fills their stats but leaves user at 0
+  const otherClubs=others.slice(); // all non-user clubs
+  const bgPlayed=new Set();
+  otherClubs.forEach(c=>{
+    const possible=otherClubs.filter(x=>x!==c).sort(()=>Math.random()-.5).slice(0,8);
+    possible.forEach(opp=>{
+      const key=[c,opp].sort().join('|');
+      if(bgPlayed.has(key))return;bgPlayed.add(key);
+      const s1=clStr(c),s2=clStr(opp);
+      const e1=Math.pow(s1,2.0),e2=Math.pow(s2,2.0),t=e1+e2;
+      const g1=poisson(e1/t*2.4),g2=poisson(e2/t*2.2); // lower scoring for background
+      const r1=G.leagueRows.find(r=>r.name===c);
+      const r2=G.leagueRows.find(r=>r.name===opp);
+      if(!r1||!r2)return;
+      if(g1>g2){r1.w++;r1.pts+=3;r2.l++;}else if(g1===g2){r1.d++;r1.pts++;r2.d++;r2.pts++;}else{r2.w++;r2.pts+=3;r1.l++;}
+      r1.gf+=g1;r1.ga+=g2;r2.gf+=g2;r2.ga+=g1;
     });
   });
 
-  // Now simulate user's 8 matches — store results separately for live replay
-  // User's opponents come from oppsMap[usIdx]
-  const userOpps=oppsMap[usIdx]||[];
-  const usRow=G.leagueRows[usIdx];
-  userOpps.forEach(j=>{
-    const opp=G.leagueRows[j];
-    const key=[Math.min(usIdx,j),Math.max(usIdx,j)].join('-');
-    if(played.has(key))return;played.add(key);
-    const[g1,g2]=simMatchNeutral(myStr(),clStr(opp.name));
-    // Store for live replay — don't apply to leagueRows yet
-    G.leagueMatches.push({t1:MY_TEAM,t2:opp.name,s1:g1,s2:g2,usIn:true,oppIdx:j});
+  // Simulate exactly 8 user matches and store for live replay — DO NOT apply stats yet
+  userOpponents.forEach(opp=>{
+    const ms=myStr(),cs=clStr(opp);
+    const e1=Math.pow(ms,2.0),e2=Math.pow(cs,2.0),t=e1+e2;
+    const g1=poisson(e1/t*2.4),g2=poisson(e2/t*2.2);
+    G.leagueMatches.push({t1:MY_TEAM,t2:opp,s1:g1,s2:g2,usIn:true});
   });
 
-  // Also simulate matches where other teams are scheduled vs user but user didn't get them in oppsMap
-  // (just sim them as background)
-  G.leagueRows.forEach((_,i)=>{
-    if(i===usIdx)return;
-    (oppsMap[i]||[]).forEach(j=>{
-      if(j!==usIdx)return;
-      const key=[Math.min(i,j),Math.max(i,j)].join('-');
-      if(played.has(key))return;played.add(key);
-      // Background sim for this match
-      const opp=G.leagueRows[i];
-      const[g1,g2]=simMatchNeutral(clStr(opp.name),myStr());
-      G.leagueMatches.push({t1:opp.name,t2:MY_TEAM,s1:g1,s2:g2,usIn:true,oppIdx:i});
-    });
+  // Sort background teams (user stays at 0 until live sim reveals matches)
+  G.leagueRows.sort((a,b)=>{
+    if(a.isUs)return 1; // user goes to bottom initially
+    if(b.isUs)return -1;
+    return b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf;
   });
-
-  // Sort non-user teams now (user starts at 0 pts, will update live)
-  // Don't sort yet — sidebar will show live user position as matches are revealed
 }
 
-// Apply a user league match result to leagueRows
+// Apply one user league match result to leagueRows and resort
 function applyLeagueMatch(m){
   const usRow=G.leagueRows.find(r=>r.isUs);
   const oppRow=G.leagueRows.find(r=>r.name===(m.t1===MY_TEAM?m.t2:m.t1));
@@ -1380,9 +1366,7 @@ function applyLeagueMatch(m){
   else{usRow.l++;if(oppRow){oppRow.w++;oppRow.pts+=3;}}
   usRow.gf+=usGoals;usRow.ga+=oppGoals;
   if(oppRow){oppRow.gf+=oppGoals;oppRow.ga+=usGoals;}
-  // Score goals
   for(let k=0;k<usGoals;k++){const s=pickScorer();G.goalscorers[s]=(G.goalscorers[s]||0)+1;}
-  // Re-sort
   G.leagueRows.sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
 }
 function getLeagueQualifiers(){
